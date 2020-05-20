@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html>
+  <head>    
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Testing Pie Chart</title>
+   <!--<script type="text/javascript" src="d3/d3.v2.js"></script>-->
+    <script src="https://d3js.org/d3.v2.js"></script>
+    <style type="text/css">
+
+
+#pieChart {   
+	padding:90px; 
+	position:absolute;
+	top:10px;
+	left:10px;
+	width:400px;
+	height: 400px; 
+}
+
+.header {
+    padding: 40px;
+    text-align: center;
+    background: #c96fb5;
+    color: white;
+    font-size: 30px;
+  }
+
+.slice {
+   font-size: 10pt; 
+   font-family: Verdana;
+   fill: white; 
+   font-weight: bold;	
+  		} 
+
+/*for line chart*/
+.axis path, .axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges; 
+}
+#barChart {
+	padding: 90px;
+	position:absolute;
+	top:160px;
+	left:410px;
+	height: 250px;
+}
+
+.line {
+  fill: none;
+  /*stroke: steelblue;*/
+  stroke-width: 3px;
+}
+
+.dot {
+  /*fill: white;*/
+  /*stroke: steelblue;*/
+  stroke-width: 1.5px;
+  }
+				
+
+.axis text {
+    font-family: Verdana;
+    font-size: 11px;
+}
+
+.title {
+	 font-family: Verdana;
+    font-size: 15px;	
+		
+}
+table {
+	border-collapse:collapse;
+	border: 0px;	
+	font-family: Verdana;	
+	color: #5C5558;
+	font-size: 12px;
+	text-align: right;			
+}
+
+
+
+
+				 
+   </style>
+  </head>
+  <body>
+	<<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	
+	
+	<div id="throbber" style="display:none; min-height:120px;"></div>
+	<div id="noty-holder"></div>
+	<div id="wrapper">
+		<!-- Navigation -->
+		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+			<!-- Brand and toggle get grouped for better mobile display -->
+			<div class="navbar-header">
+			   
+			</div>
+			<!-- Top Menu Items -->
+			<ul class="nav navbar-right top-nav">
+				<li style="display: flex, flex-direction: row, align-items: center" id="names"> Ahmad Usama </li>
+				<li style="display: flex, flex-direction: row, align-items: center" id="names"> Hinna Hussain , </li>
+				<li style="display: flex, flex-direction: row, align-items: center" id="names"> Tanmay Bhanushali , </li>
+			</ul>
+			<!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+			<div class="collapse navbar-collapse navbar-ex1-collapse">
+				<ul class="nav navbar-nav side-nav">
+					<li>
+						<a href="/"><i class="fa fa-fw fa"></i> General Overview <i class="fa fa-fw fa"></i></a>
+					</li>
+					<li>
+						<a href="/piechart+bar.html" ><i class="fa fa-fw fa"></i>Trend in Air Pollution<i class="fa fa-fw fa"></i></a>
+					</li>
+					<li>
+						<a href="/lineChartFinal.html" ><i class="fa fa-fw fa"></i>Air Pollutants Concentration<i class="fa fa-fw fa"></i></a>
+					</li>
+					<li>
+						<a href="/chloropleth.html"><i class="fa fa-fw fa"></i>  Chloropleth Graph(World Map Rating)</a>
+						</li>
+						<li>
+							<a href="/conclusion.html"><i class="fa fa-fw fa"></i>  Conclusion</a>
+							</li>
+						<li>
+							<a href="/about.html"><i class="fa fa-fw fa"></i> About</a>
+							</li>
+				</ul>
+			</div>
+		   
+		</nav>
+	<div class="header">
+        <h1>Average Trends in Air Pollution Across the World</h1>
+        <p class="lead">
+            This graph visualizes the change in the concentration of primary air pollutants in major cities across the world.
+        </p>
+    </div>
+	<div id="pieChart"><br><br><br><br><br><br></div>
+    <div id="barChart"></div> 
+      <script type="text/javascript">
+    
+/*
+################ FORMATS ##################
+-------------------------------------------
+*/
+
+
+var 	formatAsPercentage = d3.format("%"),
+		formatAsPercentage1Dec = d3.format(".1%"),
+		formatAsInteger = d3.format(","),
+		fsec = d3.time.format("%S s"),
+		fmin = d3.time.format("%M m"),
+		fhou = d3.time.format("%H h"),
+		fwee = d3.time.format("%a"),
+		fdat = d3.time.format("%d d"),
+		fmon = d3.time.format("%b")
+		;
+
+/*
+############# PIE CHART ###################
+-------------------------------------------
+*/
+
+
+
+function dsPieChart(){
+
+	var dataset = [
+			{category: "Wuhan", measure: 0.116},
+	      {category: "Hong Kong", measure: 0.095},
+	      {category: "Mumbai", measure: 0.073},
+	      {category: "Los Angeles", measure: 0.058},
+	      {category: "Sao Paulo", measure: 0.058},
+	      {category: "London", measure:0.062},
+        {category: "Rome", measure: 0.002},
+        {category: "Seoul", measure: 0.087},
+        {category: "Christchurch", measure: 0.039},
+        {category: "Tehran", measure: 0.404}
+	      ]
+	      ;
+
+	var 	width = 400,
+		   height = 400,
+		   outerRadius = Math.min(width, height) / 2,
+		   innerRadius = outerRadius * .999,   
+		   // for animation
+		   innerRadiusFinal = outerRadius * .5,
+		   innerRadiusFinal3 = outerRadius* .45,
+		   color = d3.scale.category20()    //builtin range of colors
+		   ;
+	    
+	var vis = d3.select("#pieChart")
+	     .append("svg:svg")              //create the SVG element inside the <body>
+	     .data([dataset])                   //associate our data with the document
+	         .attr("width", width)           //set the width and height of our visualization (these will be attributes of the <svg> tag
+	         .attr("height", height)
+	     		.append("svg:g")                //make a group to hold our pie chart
+	         .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")")    //move the center of the pie chart from 0, 0 to radius, radius
+				;
+				
+   var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
+        	.outerRadius(outerRadius).innerRadius(innerRadius);
+   
+   // for animation
+   var arcFinal = d3.svg.arc().innerRadius(innerRadiusFinal).outerRadius(outerRadius);
+	var arcFinal3 = d3.svg.arc().innerRadius(innerRadiusFinal3).outerRadius(outerRadius);
+
+   var pie = d3.layout.pie()           //this will create arc data for us given a list of values
+        .value(function(d) { return d.measure; });    //we must tell it out to access the value of each element in our data array
+
+   var arcs = vis.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
+        .data(pie)                          //associate the generated pie data (an array of arcs, each having startAngle, endAngle and value properties) 
+        .enter()                            //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
+            .append("svg:g")                //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
+               .attr("class", "slice")    //allow us to style things in the slices (like text)
+               .on("mouseover", mouseover)
+    				.on("mouseout", mouseout)
+    				.on("click", up)
+    				;
+    				
+        arcs.append("svg:path")
+               .attr("fill", function(d, i) { return color(i); } ) //set the color for each slice to be chosen from the color function defined above
+               .attr("d", arc)     //this creates the actual SVG path using the associated data (pie) with the arc drawing function
+					.append("svg:title") //mouseover title showing the figures
+				   .text(function(d) { return d.data.category + ": " + formatAsPercentage(d.data.measure); });			
+
+        d3.selectAll("g.slice").selectAll("path").transition()
+			    .duration(750)
+			    .delay(10)
+			    .attr("d", arcFinal )
+			    ;
+	
+	  // Add a label to the larger arcs, translated to the arc centroid and rotated.
+	  // source: http://bl.ocks.org/1305337#index.html
+	  arcs.filter(function(d) { return d.endAngle - d.startAngle > .2; })
+	  		.append("svg:text")
+	      .attr("dy", ".35em")
+	      .attr("text-anchor", "middle")
+	      .attr("transform", function(d) { return "translate(" + arcFinal.centroid(d) + ")rotate(" + angle(d) + ")"; })
+	      //.text(function(d) { return formatAsPercentage(d.value); })
+	      .text(function(d) { return d.data.category; })
+	      ;
+	   
+	   // Computes the label angle of an arc, converting from radians to degrees.
+		function angle(d) {
+		    var a = (d.startAngle + d.endAngle) * 90 / Math.PI - 90;
+		    return a > 90 ? a - 180 : a;
+		}
+		    
+		
+		// Pie chart title			
+		vis.append("svg:text")
+	     	.attr("dy", ".35em")
+	      .attr("text-anchor", "middle")
+        .text("Percentage of CO levels 2020")
+        .style("font", "14px Arial")
+	      .attr("class","title")
+	      ;		    
+
+
+		
+	function mouseover() {
+	  d3.select(this).select("path").transition()
+	      .duration(750)
+	        		//.attr("stroke","red")
+	        		    //.attr("stroke-width", 1.5)
+	        		.attr("d", arcFinal3)
+	        		;
+	}
+	
+	function mouseout() {
+	  d3.select(this).select("path").transition()
+	      .duration(750)
+	        		//.attr("stroke","blue")
+	        		//.attr("stroke-width", 1.5)
+	        		.attr("d", arcFinal)
+	        		;
+	}
+	function up(d, i) {
+	
+				/* update bar chart when user selects piece of the pie chart */
+				//updateBarChart(dataset[i].category);
+				updateBarChart(d.data.category, color(i));
+				//updateLineChart(d.data.category, color(i));
+			 
+	}
+}
+
+
+
+
+dsPieChart();
+
+
+/*
+############# BAR CHART ###################
+-------------------------------------------
+*/
+
+
+
+var datasetBarChart = [
+{ group: "All", category: "2015", measure: 10.51625 }, 
+{ group: "All", category: "2016", measure: 9.28375 }, 
+{ group: "All", category: "2017", measure: 7.711 }, 
+{ group: "All", category: "2018", measure: 8.163 }, 
+{ group: "All", category: "2019", measure: 6.934 }, 
+{ group: "All", category: "2020", measure: 7.01 }, 
+{ group: "Wuhan", category: "2015", measure: 10.75 }, 
+{ group: "Wuhan", category: "2016", measure: 8.78 }, 
+{ group: "Wuhan", category: "2017", measure: 8.97}, 
+{ group: "Wuhan", category: "2018", measure: 0 }, 
+{ group: "Wuhan", category: "2019", measure: 8.15 }, 
+{ group: "Wuhan", category: "2020", measure: 7.48 }, 
+{ group: "Hong Kong", category: "2015", measure: 6.53 }, 
+{ group: "Hong Kong", category: "2016", measure: 7.15}, 
+{ group: "Hong Kong", category: "2017", measure: 7.15}, 
+{ group: "Hong Kong", category: "2018", measure: 6.39 }, 
+{ group: "Hong Kong", category: "2019", measure: 6.31 }, 
+{ group: "Hong Kong", category: "2020", measure: 6.24 }, 
+{ group: "Mumbai", category: "2015", measure: 16.38 }, 
+{ group: "Mumbai", category: "2016", measure: 11.81 }, 
+{ group: "Mumbai", category: "2017", measure: 8.77 }, 
+{ group: "Mumbai", category: "2018", measure:  15}, 
+{ group: "Mumbai", category: "2019", measure: 7.1 }, 
+{ group: "Mumbai", category: "2020", measure: 7.1 }, 
+{ group: "Los Angeles", category: "2015", measure:5.87 }, 
+{ group: "Los Angeles", category: "2016", measure:  5 }, 
+{ group: "Los Angeles", category: "2017", measure:4.04  }, 
+{ group: "Los Angeles", category: "2018", measure: 0 }, 
+{ group: "Los Angeles", category: "2019", measure:4.14 }, 
+{ group: "Los Angeles", category: "2020", measure:4.22  }, 
+{ group: "Sau Paulo", category: "2015", measure: 5.69 }, 
+{ group: "Sau Paulo", category: "2016", measure: 5.19 }, 
+{ group: "Sau Paulo", category: "2017", measure: 4.8 }, 
+{ group: "Sau Paulo", category: "2018", measure:  0}, 
+{ group: "Sau Paulo", category: "2019", measure: 4.9}, 
+{ group: "Sau Paulo", category: "2020", measure:3.52 }, 
+{ group: "London", category: "2015", measure: 0}, 
+{ group: "London", category: "2016", measure: 0}, 
+{ group: "London", category: "2017", measure: 3.7 }, 
+{ group: "London", category: "2018", measure:0 }, 
+{ group: "London", category: "2019", measure: 6.25 }, 
+{ group: "London", category: "2020", measure:0  }, 
+{ group: "Seoul", category: "2015", measure: 6.63 }, 
+{ group: "Seoul", category: "2016", measure: 6.26}, 
+{ group: "Seoul", category: "2017", measure: 6.26 }, 
+{ group: "Seoul", category: "2018", measure:  6.13}, 
+{ group: "Seoul", category: "2019", measure:  6.16}, 
+{ group: "Seoul", category: "2020", measure:  6.04}, 
+{ group: "Christchurch", category: "2015", measure: 0 }, 
+{ group: "Christchurch", category: "2016", measure: 0 }, 
+{ group: "Christchurch", category: "2017", measure: 2.96  }, 
+{ group: "Christchurch", category: "2018", measure: 3.75}, 
+{ group: "Christchurch", category: "2019", measure: 2.32 }, 
+{ group: "Christchurch", category: "2020", measure: 2.57 }, 
+{ group: "Tehran", category: "2015", measure: 32.18 }, 
+{ group: "Tehran", category: "2016", measure: 29.98}, 
+{ group: "Tehran", category: "2017", measure: 30.36}, 
+{ group: "Tehran", category: "2018", measure:  17.61}, 
+{ group: "Tehran", category: "2019", measure: 23.91}, 
+{ group: "Tehran", category: "2020", measure: 25.9 },
+{ group: "Rome", category: "2015", measure: 0.1 }, 
+{ group: "Rome", category: "2016", measure: 0.1}, 
+{ group: "Rome", category: "2017", measure: 0.1}, 
+{ group: "Rome", category: "2018", measure:  0.1}, 
+{ group: "Rome", category: "2019", measure: 0.1}, 
+{ group: "Rome", category: "2020", measure: 0.1 }, 
+]
+;
+
+// set initial group value
+var group = "All";
+
+function datasetBarChosen(group) {
+	var ds = [];
+	for (x in datasetBarChart) {
+		 if(datasetBarChart[x].group==group){
+		 	ds.push(datasetBarChart[x]);
+		 } 
+		}
+	return ds;
+}
+
+
+function dsBarChartBasics() {
+
+		var margin = {top: 30, right: 5, bottom: 20, left: 50},
+		width = 500 - margin.left - margin.right,
+	   height = 250 - margin.top - margin.bottom,
+		colorBar = d3.scale.category20(),
+		barPadding = 1
+		;
+		
+		return {
+			margin : margin, 
+			width : width, 
+			height : height, 
+			colorBar : colorBar, 
+			barPadding : barPadding
+		}			
+		;
+}
+
+function dsBarChart() {
+
+	var firstDatasetBarChart = datasetBarChosen(group);         	
+	
+	var basics = dsBarChartBasics();
+	
+	var margin = basics.margin,
+		width = basics.width,
+	   height = basics.height,
+		colorBar = basics.colorBar,
+		barPadding = basics.barPadding
+		;
+					
+	var 	xScale = d3.scale.linear()
+						.domain([0, firstDatasetBarChart.length])
+						.range([0, width])
+						;
+						
+	// Create linear y scale 
+	// Purpose: No matter what the data is, the bar should fit into the svg area; bars should not
+	// get higher than the svg height. Hence incoming data needs to be scaled to fit into the svg area.  
+	var yScale = d3.scale.linear()
+			// use the max funtion to derive end point of the domain (max value of the dataset)
+			// do not use the min value of the dataset as min of the domain as otherwise you will not see the first bar
+		   .domain([0, 30])
+		   // As coordinates are always defined from the top left corner, the y position of the bar
+		   // is the svg height minus the data value. So you basically draw the bar starting from the top. 
+		   // To have the y position calculated by the range function
+		   .range([height, 0])
+		   ;
+	
+	//Create SVG element
+	
+	var svg = d3.select("#barChart")
+			.append("svg")
+		    .attr("width", width + margin.left + margin.right)
+		    .attr("height", height + margin.top + margin.bottom)
+		    .attr("id","barChartPlot")
+		    ;
+	
+	var plot = svg
+		    .append("g")
+		    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+		    ;
+	            
+	plot.selectAll("rect")
+		   .data(firstDatasetBarChart)
+		   .enter()
+		   .append("rect")
+			.attr("x", function(d, i) {
+			    return xScale(i);
+			})
+		   .attr("width", width / firstDatasetBarChart.length - barPadding)   
+			.attr("y", function(d) {
+			    return yScale(d.measure);
+			})  
+			.attr("height", function(d) {
+			    return height-yScale(d.measure);
+			})
+			.attr("fill", "lightgrey")
+			;
+	
+		
+	// Add y labels to plot	
+	
+	plot.selectAll("text")
+	.data(firstDatasetBarChart)
+	.enter()
+	.append("text")
+	.text(function(d) {
+			return formatAsInteger(d3.round(d.measure));
+	})
+	.attr("text-anchor", "middle")
+	// Set x position to the left edge of each bar plus half the bar width
+	.attr("x", function(d, i) {
+			return (i * (width / firstDatasetBarChart.length)) + ((width / firstDatasetBarChart.length - barPadding) / 2);
+	})
+	.attr("y", function(d) {
+			return yScale(d.measure) + 14;
+	})
+	.attr("class", "yAxis")
+	/* moved to CSS			   
+	.attr("font-family", "sans-serif")
+	.attr("font-size", "11px")
+	.attr("fill", "white")
+	*/
+	;
+	
+	// Add x labels to chart	
+	
+	var xLabels = svg
+		    .append("g")
+		    .attr("transform", "translate(" + margin.left + "," + (margin.top + height)  + ")")
+		    ;
+	
+	xLabels.selectAll("text.xAxis")
+		  .data(firstDatasetBarChart)
+		  .enter()
+		  .append("text")
+		  .text(function(d) { return d.category;})
+		  .attr("text-anchor", "middle")
+			// Set x position to the left edge of each bar plus half the bar width
+						   .attr("x", function(d, i) {
+						   		return (i * (width / firstDatasetBarChart.length)) + ((width / firstDatasetBarChart.length - barPadding) / 2);
+						   })
+		  .attr("y", 15)
+		  .attr("class", "xAxis")
+		  //.attr("style", "font-size: 12; font-family: Helvetica, sans-serif")
+		  ;			
+	 
+	// Title
+	
+	svg.append("text")
+		.attr("x", (width + margin.left + margin.right)/2)
+		.attr("y", 15)
+		.attr("class","title")				
+		.attr("text-anchor", "middle")
+		.text("Overall Yearly CO Levels")
+		;
+}
+
+dsBarChart();
+
+ /* ** UPDATE CHART ** */
+ 
+/* updates bar chart on request */
+
+function updateBarChart(group, colorChosen) {
+	
+		var currentDatasetBarChart = datasetBarChosen(group);
+		
+		var basics = dsBarChartBasics();
+	
+		var margin = basics.margin,
+			width = basics.width,
+		   height = basics.height,
+			colorBar = basics.colorBar,
+			barPadding = basics.barPadding
+			;
+		
+		var 	xScale = d3.scale.linear()
+			.domain([0, currentDatasetBarChart.length])
+			.range([0, width])
+			;
+		
+			
+		var yScale = d3.scale.linear()
+	      .domain([0, 30])
+	      .range([height,0])
+	      ;
+	      
+	   var svg = d3.select("#barChart svg");
+	      
+	   var plot = d3.select("#barChartPlot")
+	   	.datum(currentDatasetBarChart)
+		   ;
+	
+	  		/* Note that here we only have to select the elements - no more appending! */
+	  	plot.selectAll("rect")
+	      .data(currentDatasetBarChart)
+	      .transition()
+			.duration(750)
+			.attr("x", function(d, i) {
+			    return xScale(i);
+			})
+		   .attr("width", width / currentDatasetBarChart.length - barPadding)   
+			.attr("y", function(d) {
+			    return yScale(d.measure);
+			})  
+			.attr("height", function(d) {
+			    return height-yScale(d.measure);
+			})
+			.attr("fill", colorChosen)
+			;
+		
+		plot.selectAll("text.yAxis") // target the text element(s) which has a yAxis class defined
+			.data(currentDatasetBarChart)
+			.transition()
+			.duration(750)
+		   .attr("text-anchor", "middle")
+		   .attr("x", function(d, i) {
+		   		return (i * (width / currentDatasetBarChart.length)) + ((width / currentDatasetBarChart.length - barPadding) / 2);
+		   })
+		   .attr("y", function(d) {
+		   		return yScale(d.measure) + 14;
+		   })
+		   .text(function(d) {
+				return formatAsInteger(d3.round(d.measure));
+		   })
+		   .attr("class", "yAxis")					 
+		;
+		
+
+		svg.selectAll("text.title") // target the text element(s) which has a title class defined
+			.attr("x", (width + margin.left + margin.right)/2)
+			.attr("y", 15)
+			.attr("class","title")				
+			.attr("text-anchor", "middle")
+			.text(group + "'s Yearly Average CO Level")
+		;
+}
+
+
+    </script>
+  </body>
+</html>

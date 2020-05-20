@@ -1,0 +1,98 @@
+<!doctype html>
+<meta charset="utf-8">
+<!-- Load d3.js -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<script type="text/javascript" src="/chloropleth.js"></script>
+
+
+<div id="throbber" style="display:none; min-height:120px;"></div>
+<div id="noty-holder"></div>
+<div id="wrapper">
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+           
+        </div>
+        <!-- Top Menu Items -->
+        <ul class="nav navbar-right top-nav">
+            <li style="display: flex, flex-direction: row, align-items: center" id="names"> Ahmad Usama </li>
+            <li style="display: flex, flex-direction: row, align-items: center" id="names"> Hinna Hussain , </li>
+            <li style="display: flex, flex-direction: row, align-items: center" id="names"> Tanmay Bhanushali , </li>
+        </ul>
+        <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav side-nav">
+                <li>
+                    <a href="/"><i class="fa fa-fw fa"></i> General Overview <i class="fa fa-fw fa"></i></a>
+                </li>
+                <li>
+                  <a href="/piechart+bar.html" ><i class="fa fa-fw fa"></i>Trend in Air Pollution<i class="fa fa-fw fa"></i></a>
+              </li>
+                <li>
+                  <a href="/lineChartFinal.html" ><i class="fa fa-fw fa"></i>Air Pollutants Concentration<i class="fa fa-fw fa"></i></a>
+                </li>
+                <li>
+                    <a href="/chloropleth.html"><i class="fa fa-fw fa"></i>  Chloropleth Graph(World Map Rating)</a>
+                    </li>
+                    <li>
+                        <a href="/conclusion.html"><i class="fa fa-fw fa"></i>  Conclusion</a>
+                        </li>
+                    <li>
+                      <a href="/about.html"><i class="fa fa-fw fa"></i> About</a>
+                      </li>
+            </ul>
+        </div>
+       
+    </nav>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<!-- <div id="my_dataviz"></div> -->
+<style>
+  .header {
+    padding: 40px;
+    text-align: center;
+    background: #de8cff;
+    color: white;
+    font-size: 30px;
+  }
+</style>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+
+    <title>COVID Pollution Dashboard - Conclusion</title>
+
+  </head>
+  <body>
+    <div class="header">
+      <h1>Conclusion</h1>
+  </div>
+        <div class="container">
+          <br>
+          <p class="lead">
+            Through the visualisation of the data, the positive effects this pandemic has had on the environment is evident. Many of these cities have experienced a decrease in the levels of primary air pollutants. This result can be associated with the public responses to the pandemic as well as the epidemic control strategies. Closure of businesses, travel restrictions, and activity being limited to people's homes has greatly reduced human activity which often adds up to almost concerning pollution levels. At a time when the pandemic has brought upon great disturbances and when climate changes is an immediate concern, these results are great news! In the coming months and year, it will be interesting to see whether this trend continues and what the lasting effects will be. 
+        </p> 
+          <div class="row">
+            <div class="col" >
+              <svg id="chloropleth" width="800" height="400"></svg>
+            </div>
+          </div>
+        </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="chart.js"></script>
+</body>
+</html>
+<!-- Create an element where the map will take place -->
+<svg id="my_dataviz" width="800" height="400"></svg>
