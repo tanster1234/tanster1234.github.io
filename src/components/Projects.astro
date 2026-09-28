@@ -1,0 +1,162 @@
+---
+import { projects } from '../data/content';
+const lead = projects.find((p) => p.lead)!;
+const rest = projects.filter((p) => !p.lead);
+---
+<section id="projects" class="projects" data-theme="light">
+  <div class="wrap">
+    <header class="head">
+      <p class="eyebrow"><span class="semi">;</span> layer 02 · projects</p>
+      <h2 class="h-section" data-rise="chars">Projects</h2>
+      <p class="lede">Things I build on my own time, mostly around agents, data and the tools I use every day.</p>
+    </header>
+
+    <article class="lead on-dark" aria-labelledby="lead-title" data-sway="3">
+      <div class="lead-copy">
+        <p class="eyebrow">{lead.kicker}</p>
+        <h3 id="lead-title">{lead.name}</h3>
+        <p class="summary">{lead.summary}</p>
+        <ul class="bullets">{lead.bullets.map((b) => <li>{b}</li>)}</ul>
+        <p class="tags">{lead.stack.map((s) => <span class="chip">{s}</span>)}</p>
+      </div>
+
+      <div class="demo" data-demo aria-label="Example conversation with the TV Remote MCP">
+        <div class="tv" aria-hidden="true">
+          <div class="screen" data-screen="home">
+            <div class="s-home"><span class="t"></span><span class="t"></span><span class="t on"></span><span class="t"></span><span class="t"></span><span class="t"></span></div>
+            <div class="s-search"><span class="field"><span class="typed" data-typed></span><span class="caret"></span></span>
+              <span class="keys">{'QWERTYUIOPASDFGHJKLZXCVBNM'.split('').map((k) => <span data-key={k}>{k}</span>)}</span></div>
+            <div class="s-play"><span class="now">Now playing</span><span class="name">Mythic Quest</span><span class="bar"><span></span></span></div>
+          </div>
+          <span class="stand"></span>
+        </div>
+        <ol class="chat" data-chat>
+          <li class="msg u">Something like Severance, but lighter.</li>
+          <li class="msg a">Three picks: Mythic Quest, Loot, or The Good Place. Mythic Quest is closest in tone.</li>
+          <li class="msg u">Play the first one.</li>
+          <li class="call" data-state="search">launch_app(<b>"netflix"</b>)</li>
+          <li class="call" data-state="type">keyboard.type(<b>"Mythic Quest"</b>)</li>
+          <li class="call" data-state="play">remote.sequence([<b>"DOWN", "OK", "OK"</b>])</li>
+          <li class="msg a">Playing Mythic Quest, season 1.</li>
+        </ol>
+        <p class="note">Example conversation. It replays when this card scrolls into view.</p>
+      </div>
+    </article>
+
+    <div class="cards">
+      {rest.map((p) => (
+        <article class="card" data-sway="6">
+          <p class="eyebrow">{p.kicker}</p>
+          <h3>{p.name}</h3>
+          <p class="summary">{p.summary}</p>
+          <ul class="bullets">{p.bullets.map((b) => <li>{b}</li>)}</ul>
+          <div class="foot">
+            <p class="tags">{p.stack.map((s) => <span class="chip">{s}</span>)}</p>
+            {p.repo && <a class="repo" href={p.repo} target="_blank" rel="noopener">Repository ↗</a>}
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .projects { background: var(--bone); padding-block: clamp(96px, 14vh, 160px); border-top: 1px solid var(--line-light); }
+  .head { display: grid; gap: 18px; margin-bottom: clamp(36px, 5vw, 64px); }
+
+  .lead { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(28px, 4vw, 56px);
+    background: var(--enclosure); color: var(--bone); border-radius: 22px; padding: clamp(24px, 4vw, 48px); }
+  .lead-copy { display: grid; gap: 16px; align-content: start; }
+  .lead h3 { font-size: clamp(34px, 4.2vw, 60px); font-variation-settings: 'wdth' 120, 'wght' 800; letter-spacing: -0.015em; }
+  .summary { font-size: 17px; line-height: 1.6; }
+  .lead .summary { color: #cfd1d4; }
+  .bullets { margin: 0; padding-left: 18px; display: grid; gap: 8px; font-size: 15.5px; line-height: 1.5; }
+  .bullets li::marker { color: var(--orange); }
+  .lead .bullets { color: #c3c6ca; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .demo { display: grid; gap: 14px; align-content: start; }
+  .tv { position: relative; padding: 10px 10px 18px; border-radius: 14px; background: #08090a; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06); }
+  .screen { position: relative; aspect-ratio: 16 / 9; border-radius: 6px; overflow: hidden; background: radial-gradient(120% 90% at 50% 0%, #1d2230, #0c0d10); }
+  .stand { position: absolute; left: 50%; bottom: 6px; width: 22%; height: 4px; transform: translateX(-50%); border-radius: 4px; background: #1b1d21; }
+  .s-home, .s-search, .s-play { position: absolute; inset: 0; opacity: 0; transition: opacity 0.35s; }
+  [data-screen='home'] .s-home, [data-screen='search'] .s-search, [data-screen='type'] .s-search, [data-screen='play'] .s-play { opacity: 1; }
+  .s-home { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8%; padding: 14% 10%; }
+  .s-home .t { border-radius: 6px; background: rgba(255, 255, 255, 0.07); }
+  .s-home .t.on { background: rgba(242, 106, 27, 0.55); box-shadow: 0 0 0 2px var(--orange); }
+  .s-search { display: grid; align-content: center; gap: 7%; padding: 0 10%; }
+  .field { display: flex; align-items: center; height: 18%; min-height: 22px; padding: 0 10px; border-radius: 6px; background: rgba(255, 255, 255, 0.08);
+    font-family: var(--f-mono); font-size: clamp(10px, 1.1vw, 13px); color: #fff; }
+  .caret { width: 1px; height: 55%; margin-left: 2px; background: var(--orange); animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .keys { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; font-family: var(--f-mono); font-size: clamp(8px, 0.8vw, 10px); color: rgba(255, 255, 255, 0.6); }
+  .keys span { display: grid; place-items: center; aspect-ratio: 1.3; border-radius: 3px; background: rgba(255, 255, 255, 0.06); transition: background 0.15s, color 0.15s; }
+  .keys span.hit { background: var(--orange); color: var(--ink); }
+  .s-play { display: grid; align-content: end; gap: 6px; padding: 8%; background: linear-gradient(180deg, transparent 30%, rgba(0, 0, 0, 0.6)), radial-gradient(70% 70% at 60% 40%, #3b2a4a, #121016); }
+  .s-play .now { font-family: var(--f-mono); font-size: clamp(8px, 0.8vw, 10px); letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); }
+  .s-play .name { font-family: var(--f-display); font-size: clamp(16px, 2vw, 26px); font-variation-settings: 'wdth' 110, 'wght' 760; color: #fff; }
+  .s-play .bar { height: 3px; border-radius: 3px; background: rgba(255, 255, 255, 0.2); overflow: hidden; }
+  .s-play .bar span { display: block; height: 100%; width: 8%; background: var(--orange); }
+
+  .chat { list-style: none; margin: 0; padding: 14px; display: grid; gap: 8px; border-radius: 12px; background: #0b0c0e; border: 1px solid var(--line-dark); min-height: 280px; align-content: start; }
+  .msg { max-width: 86%; padding: 9px 12px; border-radius: 12px; font-size: 14.5px; line-height: 1.45; }
+  .msg.u { justify-self: end; background: var(--plate-2); border-bottom-right-radius: 4px; }
+  .msg.a { border: 1px solid var(--line-dark); border-bottom-left-radius: 4px; }
+  .call { font-family: var(--f-mono); font-size: 12px; color: var(--fog); padding-left: 10px; border-left: 2px solid var(--cobalt-lt); overflow-wrap: anywhere; }
+  .call b { color: var(--amber); font-weight: 500; }
+  .js .chat.armed > li { opacity: 0; transform: translateY(6px); transition: opacity 0.35s, transform 0.35s var(--ease); }
+  .js .chat.armed > li.in { opacity: 1; transform: none; }
+  .note { font-family: var(--f-mono); font-size: 11px; color: var(--fog); }
+
+  .cards { margin-top: 22px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  .card { display: grid; gap: 14px; align-content: start; padding: 26px; border-radius: 18px; border: 1px solid var(--line-light); background: #efede8; }
+  .card h3 { font-size: 26px; font-variation-settings: 'wdth' 112, 'wght' 760; line-height: 1.05; }
+  .card .summary { color: var(--slate); font-size: 16px; }
+  .card .bullets { color: var(--ink); }
+  .foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
+  .repo { font-family: var(--f-mono); font-size: 12px; white-space: nowrap; }
+  @media (max-width: 1000px) {
+    .lead { grid-template-columns: minmax(0, 1fr); }
+    .cards { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (prefers-reduced-motion: reduce) { .caret { animation: none; } }
+</style>
+
+<script>
+  const demo = document.querySelector<HTMLElement>('[data-demo]');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (demo) {
+    const screen = demo.querySelector<HTMLElement>('[data-screen]')!;
+    const chat = demo.querySelector<HTMLElement>('[data-chat]')!;
+    const typed = demo.querySelector<HTMLElement>('[data-typed]')!;
+    const items = [...chat.children] as HTMLElement[];
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const finalState = () => { items.forEach((li) => li.classList.add('in')); typed.textContent = 'Mythic Quest'; screen.dataset.screen = 'play'; };
+    async function typeText(text: string) {
+      for (const ch of text) {
+        typed.textContent += ch;
+        const key = demo!.querySelector<HTMLElement>(`[data-key="${ch.toUpperCase()}"]`);
+        key?.classList.add('hit'); await wait(90); key?.classList.remove('hit');
+      }
+    }
+    async function play() {
+      chat.classList.add('armed'); typed.textContent = ''; screen.dataset.screen = 'home';
+      items.forEach((li) => li.classList.remove('in'));
+      for (const li of items) {
+        await wait(li.classList.contains('msg') ? 700 : 450);
+        li.classList.add('in');
+        const s = li.dataset.state;
+        if (s === 'search') screen.dataset.screen = 'search';
+        if (s === 'type') { screen.dataset.screen = 'type'; await typeText('Mythic Quest'); }
+        if (s === 'play') { await wait(300); screen.dataset.screen = 'play'; }
+      }
+    }
+    if (reduce || !('IntersectionObserver' in window)) finalState();
+    else {
+      let done = false;
+      new IntersectionObserver((es, io) => {
+        if (es.some((e) => e.isIntersecting) && !done) { done = true; io.disconnect(); play(); }
+      }, { threshold: 0.35 }).observe(demo);
+    }
+  }
+</script>

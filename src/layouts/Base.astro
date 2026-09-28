@@ -1,0 +1,51 @@
+---
+import '../styles/fonts.css';
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import { person } from '../data/content';
+
+interface Props { title?: string; description?: string; }
+const {
+  title = `${person.name}: ${person.title}`,
+  description = `${person.name} builds forecasting engines, AI agents and real-time data systems. ${person.title}, and a maker after hours.`,
+} = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://tanster1234.github.io');
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#0e0f11" />
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(`${base}/og.jpg`, Astro.site ?? 'https://tanster1234.github.io')} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/archivo-normal-latin.woff2" crossorigin />
+    <link rel="preload" as="image" href={`${base}/film/d/f_0001.jpg`} />
+    <script is:inline>document.documentElement.classList.add('js');</script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <Nav />
+    <main id="main">
+      <slot />
+    </main>
+    <script>
+      import { startMotion } from '../scripts/motion';
+      startMotion();
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  .skip { position: absolute; left: 12px; top: -60px; z-index: 100; background: var(--orange); color: var(--ink);
+    padding: 10px 14px; border-radius: 8px; font-family: var(--f-mono); font-size: 12px; text-decoration: none; }
+  .skip:focus { top: 12px; }
+</style>

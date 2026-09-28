@@ -1,0 +1,70 @@
+---
+// First-paint moment: the TB toolpath draws itself while the film's first frames load,
+// the nozzle dot lands, then the curtain lifts and the wordmark rises (anime.js).
+// Only shown when JS runs; a CSS failsafe removes it even if the script never does.
+---
+<div class="preloader" aria-hidden="true">
+  <svg class="pl-mark" viewBox="0 0 68 64">
+    <path d="M6 12H42a10 10 0 0 1 0 20H30M30 12V52H44a10 10 0 0 0 0-20H30M17 12V52" fill="none" stroke="#E9E7E1"
+      stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="62.5" cy="50.75" r="4" fill="#F26A1B" />
+  </svg>
+  <span class="pl-bar"><span></span></span>
+</div>
+
+<style>
+  .preloader { display: none; }
+  :global(.js) .preloader { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; align-content: center; gap: 28px;
+    background: var(--deep); animation: pl-failsafe 0.4s 4.5s forwards; }
+  .pl-mark { width: clamp(72px, 9vw, 112px); height: auto; overflow: visible; }
+  .pl-mark circle { transform-box: fill-box; transform-origin: center; transform: scale(0); }
+  .pl-bar { width: clamp(120px, 14vw, 180px); height: 2px; background: rgba(233, 231, 225, 0.12); overflow: hidden; border-radius: 2px; }
+  .pl-bar span { display: block; height: 100%; width: 100%; background: var(--orange); transform-origin: left; transform: scaleX(0); }
+  @keyframes pl-failsafe { to { opacity: 0; visibility: hidden; } }
+  @media (prefers-reduced-motion: reduce) { :global(.js) .preloader { display: none; } }
+</style>
+
+<script>
+  import { animate, createTimeline, stagger, svg, utils } from 'animejs';
+
+  const pl = document.querySelector<HTMLElement>('.preloader');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const chars = document.querySelectorAll<HTMLElement>('.wm-c');
+  const role = document.querySelector<HTMLElement>('.beat-title .role');
+  const deepLink = new URLSearchParams(location.search).has('jump') || location.hash.length > 1;
+
+  if (!pl || reduce || deepLink) {
+    pl?.remove();
+  } else {
+    let seen = false;
+    try { seen = sessionStorage.getItem('tb-seen') === '1'; sessionStorage.setItem('tb-seen', '1'); } catch { /* private mode */ }
+    const speed = seen ? 0.45 : 1;
+    const bar = pl.querySelector<HTMLElement>('.pl-bar span')!;
+
+    // hold the wordmark below its baseline until the curtain lifts
+    utils.set(chars, { translateY: '115%' });
+    if (role) utils.set(role, { opacity: 0 });
+
+    const draw = createTimeline({ defaults: { ease: 'inOutQuad' } })
+      .add(svg.createDrawable('.pl-mark path'), { draw: ['0 0', '0 1'], duration: 1100 * speed })
+      .add('.pl-mark circle', { scale: [0, 1], duration: 420 * speed, ease: 'outBack(2)' }, '-=120');
+
+    const t0 = performance.now();
+    const ready = new Promise<void>((resolve) => {
+      const tick = () => {
+        const frac = Math.min(1, ((window as any).__filmLoaded ?? 0) / 0.06);
+        bar.style.transform = `scaleX(${Math.max(frac, Math.min(1, (performance.now() - t0) / 2600))})`;
+        if (((window as any).__ready && frac >= 1) || performance.now() - t0 > 2800) resolve(); else requestAnimationFrame(tick);
+      };
+      tick();
+    });
+
+    Promise.all([draw.then(() => {}), ready]).then(() => {
+      pl.style.animation = 'none';
+      animate(pl, { clipPath: ['inset(0% 0% 0% 0%)', 'inset(0% 0% 100% 0%)'], duration: 900 * Math.max(speed, 0.7), ease: 'inOutExpo' })
+        .then(() => pl.remove());
+      animate(chars, { translateY: ['115%', '0%'], duration: 1100, delay: stagger(45, { start: 250 }), ease: 'outExpo' });
+      if (role) animate(role, { opacity: [0, 1], translateY: [10, 0], duration: 800, delay: 700, ease: 'outQuad' });
+    });
+  }
+</script>

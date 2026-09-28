@@ -1,0 +1,106 @@
+---
+// The scroll film. Canvas + pre-extracted JPEG frames, never <video currentTime>.
+// Frames live in /public/film/d/f_0001.jpg ... ; the manifest is written by the assembly step.
+import manifest from '../data/film.json';
+import { person, filmBeats } from '../data/content';
+import Preloader from './Preloader.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<section id="film" class="film on-dark" aria-label="Opening film" data-theme="dark"
+  data-frames={manifest.count} data-dir={`${base}/film/d/`} data-lit={`${base}/film/lit.jpg`}
+  data-remap={JSON.stringify(manifest.remap ?? [])}>
+  <Preloader />
+  <div class="film-sticky">
+    <canvas class="film-canvas" aria-hidden="true"></canvas>
+    <img class="film-poster" src={`${base}/film/d/f_0001.jpg`} alt="" aria-hidden="true" />
+    <div class="film-bloom" aria-hidden="true"></div>
+    <div class="film-grain" aria-hidden="true"></div>
+    <div class="film-day" aria-hidden="true"></div>
+
+    <div class="beat beat-title" data-from="0" data-to="0.1">
+      <h1 class="wordmark" aria-label={`${person.mark}.`}>
+        {person.mark.split('').map((c) => c === ' ' ? <span class="wm-sp"> </span> : <span class="wm-c" aria-hidden="true">{c}</span>)}<span class="wm-c dot" aria-hidden="true">.</span>
+      </h1>
+      <p class="role">{person.title}</p>
+    </div>
+    {filmBeats.map((b) => (
+      <p class="beat beat-line" data-from={b.at - 0.07} data-to={b.at + 0.07}>{b.text}</p>
+    ))}
+
+    <div class="film-hud" aria-hidden="true">
+      <span class="hud-l">; film</span>
+      <span class="hud-r"><span class="hud-n">000</span> / {String(manifest.count).padStart(3, '0')}</span>
+    </div>
+    <div class="film-load" aria-hidden="true"><span class="bar"></span></div>
+    <div class="scroll-cue" aria-hidden="true"><span></span>Scroll</div>
+  </div>
+
+  <ol class="film-still-sequence" aria-label="The film as still frames">
+    {manifest.stills.map((s: { src: string; alt: string }, i: number) => (
+      <li>
+        <img src={`${base}/film/${s.src}`} alt={s.alt} loading="lazy" />
+        {filmBeats[i - 1] && <p class="still-cap">{filmBeats[i - 1].text}</p>}
+      </li>
+    ))}
+  </ol>
+</section>
+
+<style>
+  .film { position: relative; height: 760vh; background: var(--deep); color: #fff; }
+  .film-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--deep); }
+  .film-canvas, .film-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .film-poster { object-fit: contain; }
+  .film-canvas { z-index: 1; }
+  .film-poster { z-index: 0; }
+  .film-bloom { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0;
+    background: radial-gradient(40% 55% at 50% 52%, rgba(255, 236, 196, 0.55), rgba(255, 190, 90, 0.22) 45%, rgba(255, 178, 63, 0) 75%); }
+  /* lights-on: the lamp's glow opens up into daylight, so the page is already bone when the intro arrives */
+  .film-day { position: absolute; inset: 0; z-index: 6; pointer-events: none; opacity: 0;
+    background: radial-gradient(70% 60% at 50% 55%, #fff4dc 0%, #f5ead3 38%, var(--bone) 72%); }
+  .film-grain { position: absolute; inset: 0; z-index: 4; pointer-events: none; opacity: 0.07;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+  .beat { position: absolute; z-index: 5; left: var(--gutter); bottom: clamp(56px, 12vh, 140px); margin: 0; opacity: 0; pointer-events: none; }
+  .beat::before { content: ''; position: absolute; z-index: -1; inset: -70% -30% -70% -18%;
+    background: radial-gradient(60% 58% at 24% 50%, rgba(5, 5, 6, 0.7), rgba(5, 5, 6, 0.38) 45%, transparent 78%); }
+  .beat-title { opacity: 1; }
+  .wordmark { font-size: clamp(42px, 13vw, 220px); line-height: 0.84; white-space: nowrap; letter-spacing: -0.025em;
+    font-variation-settings: 'wdth' 125, 'wght' 820; color: #fff; text-shadow: 0 2px 40px rgba(0, 0, 0, 0.45); }
+  .wordmark .dot { color: var(--orange); }
+  .wordmark { overflow: hidden; padding: 0.08em 0 0.14em; margin: -0.08em 0 -0.14em; }
+  .wm-c { display: inline-block; }
+  .wm-sp { display: inline-block; width: 0.26em; }
+  .role { margin-top: 14px; font-family: var(--f-mono); font-size: clamp(11px, 1vw, 13px); letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.86); }
+  .beat-line { font-family: var(--f-display); font-size: clamp(26px, 3.6vw, 52px); line-height: 1.02; max-width: 16ch;
+    font-variation-settings: 'wdth' 108, 'wght' 680; color: #fff; text-shadow: 0 2px 30px rgba(0, 0, 0, 0.55); }
+
+  .film-hud { position: absolute; z-index: 5; right: var(--gutter); bottom: 22px; display: flex; gap: 18px;
+    font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.55); font-variant-numeric: tabular-nums; }
+  .hud-l { color: var(--orange); }
+  .film-load { position: absolute; z-index: 6; left: 0; right: 0; bottom: 0; height: 2px; }
+  .film-load .bar { display: block; height: 100%; width: 0; background: var(--orange); transition: width 0.2s linear, opacity 0.6s; }
+  .film-load.done .bar { opacity: 0; }
+  .scroll-cue { position: absolute; z-index: 5; left: 50%; bottom: 22px; transform: translateX(-50%); display: grid; justify-items: center; gap: 8px;
+    font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); }
+  .scroll-cue span { width: 1px; height: 36px; background: linear-gradient(transparent, rgba(255, 255, 255, 0.7)); animation: cue 1.8s var(--ease) infinite; transform-origin: top; }
+  @keyframes cue { 0% { transform: scaleY(0); } 60% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+
+  .film-still-sequence { display: none; }
+  @media (max-width: 600px) { .film-hud { display: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .film { height: auto; }
+    .film-sticky { position: relative; height: 100vh; }
+    .film-canvas, .film-hud, .scroll-cue, .film-load, .beat-line { display: none; }
+    .film-still-sequence { display: grid; gap: 2px; list-style: none; margin: 0; padding: 0; background: var(--deep); }
+    .film-still-sequence li { position: relative; }
+    .film-still-sequence img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+    .still-cap { position: absolute; left: var(--gutter); bottom: 8%; margin: 0; max-width: 18ch; font-family: var(--f-display); font-size: clamp(22px, 3vw, 40px);
+      font-variation-settings: 'wdth' 108, 'wght' 680; line-height: 1.05; color: #fff; text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6); }
+  }
+</style>
+
+<script>
+  import { startFilm } from '../scripts/film';
+  startFilm(document.getElementById('film') as HTMLElement);
+</script>

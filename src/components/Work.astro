@@ -1,0 +1,82 @@
+---
+import { roles } from '../data/content';
+---
+<section id="work" class="work" data-theme="light">
+  <div class="wrap grid">
+    <header class="side">
+      <p class="eyebrow"><span class="semi">;</span> layer 01 · work</p>
+      <h2 class="h-section" data-rise="chars">Work</h2>
+      <p class="lede">Since 2017: forecasting, real-time data, trading systems and full-stack product work. Client work is described by industry, not by name.</p>
+    </header>
+    <div class="roles-wrap">
+    <span class="rail" aria-hidden="true"><span class="rail-fill"></span></span>
+    <ol class="roles">
+      {roles.map((r, i) => (
+        <li class:list={['role', { current: r.current }]}>
+          <details open={i === 0}>
+            <summary>
+              <span class:list={['when', { pending: r.datesPending }]}>{r.datesPending ? '—' : r.when}</span>
+              <span class="node" aria-hidden="true"></span>
+              <span class="what">
+                <span class="title">{r.role} <span class="at">· {r.org}</span></span>
+                <span class="sum">{r.summary}</span>
+              </span>
+              {r.points && <span class="plus" aria-hidden="true"></span>}
+            </summary>
+            {r.points && (
+              <div class="detail">
+                <ul>{r.points.map((p) => <li>{p}</li>)}</ul>
+                {r.stack && <p class="tags">{r.stack.map((s) => <span class="chip">{s}</span>)}</p>}
+              </div>
+            )}
+          </details>
+        </li>
+      ))}
+    </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .work { background: var(--bone); padding-block: clamp(96px, 14vh, 160px); }
+  .grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr); gap: clamp(32px, 6vw, 96px); align-items: start; }
+  .side { position: sticky; top: 110px; display: grid; gap: 18px; }
+  .roles-wrap { position: relative; --rail-x: 133px; }
+  .rail { position: absolute; left: var(--rail-x); top: 30px; bottom: 34px; width: 2px; background: var(--line-light); z-index: 0; }
+  .rail-fill { position: absolute; inset: 0; background: linear-gradient(var(--orange), var(--amber)); transform-origin: top; transform: scaleY(0); box-shadow: 0 0 10px rgba(242, 106, 27, 0.35); }
+  .roles { position: relative; z-index: 1; list-style: none; margin: 0; padding: 0; border-top: 2px solid var(--ink); }
+  .role { border-bottom: 1px solid var(--line-light); }
+  details > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 112px 14px minmax(0, 1fr) 20px; gap: 16px; padding: 22px 0; }
+  details > summary::-webkit-details-marker { display: none; }
+  .when { font-family: var(--f-mono); font-size: 12px; color: var(--slate); padding-top: 4px; font-variant-numeric: tabular-nums; }
+  .when.pending { color: var(--orange); }
+  .node { width: 11px; height: 11px; margin-top: 6px; border-radius: 50%; border: 2px solid var(--ink); background: var(--bone);
+    transition: background-color 0.35s, border-color 0.35s, box-shadow 0.5s var(--ease), transform 0.35s var(--ease); }
+  .role.lit .node, .current .node { background: var(--orange); border-color: var(--orange); box-shadow: 0 0 0 5px rgba(242, 106, 27, 0.18); transform: scale(1.1); }
+  .what { display: grid; gap: 6px; }
+  .title { font-family: var(--f-display); font-size: clamp(20px, 1.9vw, 26px); font-variation-settings: 'wdth' 110, 'wght' 720; line-height: 1.1; }
+  .at { color: var(--slate); font-variation-settings: 'wdth' 100, 'wght' 500; }
+  .sum { color: var(--slate); font-size: 16px; line-height: 1.5; }
+  .plus { position: relative; width: 20px; height: 20px; margin-top: 4px; }
+  .plus::before, .plus::after { content: ''; position: absolute; left: 3px; right: 3px; top: 9px; height: 2px; background: var(--ink); transition: transform 0.25s var(--ease); }
+  .plus::after { transform: rotate(90deg); }
+  details[open] .plus::after { transform: rotate(0deg); }
+  .detail { display: grid; gap: 16px; padding: 0 0 26px calc(112px + 14px + 32px); }
+  .detail ul { margin: 0; padding-left: 18px; display: grid; gap: 10px; color: var(--ink); font-size: 16px; line-height: 1.55; }
+  .detail li::marker { color: var(--orange); }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: minmax(0, 1fr); }
+    .side { position: static; }
+  }
+  @media (max-width: 560px) {
+    .roles-wrap { --rail-x: 6px; }
+    .rail { top: 62px; }
+    details > summary { grid-template-columns: 14px minmax(0, 1fr) 20px; }
+    .when { grid-column: 2; grid-row: 1; padding-top: 0; }
+    .node { grid-column: 1; grid-row: 2; }
+    .what { grid-column: 2; grid-row: 2; }
+    .plus { grid-column: 3; grid-row: 2; }
+    .detail { padding-left: 30px; }
+  }
+</style>

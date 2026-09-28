@@ -1,0 +1,38 @@
+{
+  "count": 527,
+  "width": 1024,
+  "height": 576,
+  "fps": 24,
+  "seam": "#603212",
+  "remap": [],
+  "stills": [
+    {
+      "src": "kf0.jpg",
+      "alt": "Threads of light drift through a dark printer chamber"
+    },
+    {
+      "src": "kf1.jpg",
+      "alt": "The threads gather into one line that turns orange inside a forecast band"
+    },
+    {
+      "src": "kf2.jpg",
+      "alt": "Close up, the line is an engineered lattice over the build plate"
+    },
+    {
+      "src": "kf3.jpg",
+      "alt": "The lattice becomes molten filament feeding a nozzle that prints a ring"
+    },
+    {
+      "src": "kf4.jpg",
+      "alt": "A translucent lamp shade half printed, layer by layer"
+    },
+    {
+      "src": "kf5.jpg",
+      "alt": "The finished shade, unlit"
+    },
+    {
+      "src": "lit.jpg",
+      "alt": "The shade switched on, glowing amber"
+    }
+  ]
+}

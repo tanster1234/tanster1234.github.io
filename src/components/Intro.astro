@@ -1,0 +1,52 @@
+---
+import { person, stats, education } from '../data/content';
+---
+<section id="intro" class="intro" data-theme="light">
+  <div class="glow" aria-hidden="true"></div>
+  <div class="wrap">
+    <p class="eyebrow"><span class="semi">;</span> {person.title}</p>
+    <h2 class="headline" data-rise="lines">{person.headline}</h2>
+    <p class="support" data-rise="fade">{person.support}</p>
+    <ul class="stats" aria-label="Selected results">
+      {stats.map((s) => (
+        <li class="stat">
+          <span class:list={['num', { long: s.value.includes('–') }]} data-count={s.value}>{s.value}<sup>{s.unit}</sup></span>
+          <span class="label">{s.label}</span>
+        </li>
+      ))}
+    </ul>
+    <p class="edu">
+      {education.map((e) => <span><b>{e.degree}</b> · {e.school} · {e.year}</span>)}
+    </p>
+  </div>
+</section>
+
+<style>
+  .intro { position: relative; overflow: hidden; padding-block: clamp(96px, 14vh, 160px) clamp(80px, 12vh, 140px); background: var(--bone); }
+  /* the lamp's warmth, carried over from the film's daylight bloom and fading out */
+  .glow { position: absolute; left: 50%; top: -38vh; width: 140vw; height: 76vh; transform: translateX(-50%); pointer-events: none;
+    background: radial-gradient(50% 50% at 50% 50%, rgba(255, 236, 196, 0.9), rgba(245, 234, 211, 0.5) 45%, rgba(233, 231, 225, 0) 72%); }
+  .wrap { position: relative; display: grid; gap: 28px; }
+  .headline { font-size: clamp(44px, 7.4vw, 112px); line-height: 0.93; letter-spacing: -0.025em; max-width: 14ch; }
+  .support { font-size: clamp(19px, 1.7vw, 24px); color: var(--slate); max-width: 44ch; line-height: 1.5; }
+  .stats { list-style: none; margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 2px solid var(--ink); }
+  .stat { display: grid; gap: 10px; align-content: start; padding: 24px 22px 8px 0; }
+  .stat + .stat { padding-left: 22px; border-left: 1px solid var(--line-light); }
+  .num { font-family: var(--f-display); font-size: clamp(44px, 5.4vw, 80px); line-height: 0.88; letter-spacing: -0.02em;
+    font-variation-settings: 'wdth' 118, 'wght' 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .num.long { font-size: clamp(36px, 4.1vw, 62px); font-variation-settings: 'wdth' 100, 'wght' 800; }
+  .num sup { font-size: 0.42em; vertical-align: 0.95em; margin-left: 2px; color: var(--orange); }
+  .label { font-size: 15px; color: var(--slate); line-height: 1.45; max-width: 26ch; }
+  .edu { display: flex; flex-wrap: wrap; gap: 8px 28px; font-size: 14.5px; color: var(--slate); margin-top: 8px; }
+  .edu b { color: var(--ink); font-weight: 600; }
+  @media (max-width: 900px) {
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stat:nth-child(3) { padding-left: 0; border-left: 0; }
+    .stat:nth-child(n + 3) { border-top: 1px solid var(--line-light); }
+  }
+  @media (max-width: 480px) {
+    .stats { grid-template-columns: minmax(0, 1fr); }
+    .stat, .stat + .stat { padding-left: 0; border-left: 0; }
+    .stat + .stat { border-top: 1px solid var(--line-light); }
+  }
+</style>

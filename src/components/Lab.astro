@@ -1,0 +1,94 @@
+---
+import { lab } from '../data/content';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<section id="lab" class="lab on-dark" data-theme="dark">
+  <div class="wrap grid">
+    <div class="copy">
+      <p class="eyebrow"><span class="semi">;</span> layer 04 · the lab</p>
+      <h2 class="h-section" data-rise="chars">The Lab</h2>
+      <p class="lede">After hours I design and print things: lamps, clocks, lightboxes, HueForge posters and custom coasters. My favourite material is translucent PLA with a light inside it.</p>
+      <dl class="spec">
+        <div><dt>Printer</dt><dd>{lab.printer}</dd></div>
+        <div><dt>Nozzle</dt><dd>{lab.nozzle}</dd></div>
+        <div><dt>Favourite prints</dt><dd>Lamps and lightboxes</dd></div>
+      </dl>
+    </div>
+    <figure class="hero print3d" data-print="forecast-lamp" data-cursor="Switch it on">
+      <img class="print-fallback" src={`${base}/film/lit.jpg`} alt="A translucent 3D-printed lamp shade glowing amber on a build plate" loading="lazy" decoding="async" />
+      <figcaption>
+        <span class="cap-name">Forecast lamp</span>
+        <span class="cap-spec">PLA · 0.2 mm layers · the profile is a demand curve</span>
+      </figcaption>
+      <button class="lamp-switch" type="button" aria-pressed="false">Switch on</button>
+    </figure>
+  </div>
+  <div class="wrap">
+    <ol class="queue" aria-label="Print log">
+      {lab.pieces.map((p, i) => (
+        <li>
+          <span class="idx">{String(i + 1).padStart(2, '0')}</span>
+          <span class="swatches" aria-hidden="true">{p.swatches.map((c) => <span style={`--c:${c}`}></span>)}</span>
+          <span class="name">{p.name}</span>
+          <span class="kind">{p.kind}</span>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .lab { position: relative; background: var(--enclosure); color: var(--bone); padding-block: clamp(96px, 14vh, 160px); }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(28px, 5vw, 72px); align-items: center; }
+  .copy { display: grid; gap: 20px; }
+  .spec { display: grid; gap: 0; margin: 8px 0 0; border-top: 1px solid var(--line-dark); }
+  .spec div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line-dark); }
+  .spec dt { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--fog); }
+  .spec dd { margin: 0; text-align: right; }
+  .hero { margin: 0; position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 16 / 11; max-width: 100%;
+    background: radial-gradient(80% 70% at 50% 60%, #1d1f23, #111214); box-shadow: 0 40px 120px -50px rgba(255, 178, 63, 0.35);
+    transition: box-shadow 0.6s var(--ease); }
+  .hero.is-lit { box-shadow: 0 50px 160px -40px rgba(255, 178, 63, 0.7); }
+  .print-fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 0.6s; }
+  .hero.is-3d .print-fallback { opacity: 0; }
+  .hero :global(.print-canvas) { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .hero figcaption { position: absolute; left: 16px; bottom: 14px; display: grid; gap: 2px; pointer-events: none; }
+  .cap-name { font-family: var(--f-display); font-size: 18px; font-variation-settings: 'wdth' 110, 'wght' 700; color: var(--bone); }
+  .cap-spec { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.04em; color: var(--fog); }
+  .lamp-switch { position: absolute; right: 14px; bottom: 14px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line-dark); background: rgba(14, 15, 17, 0.6); color: var(--bone); cursor: pointer; }
+  .lamp-switch[aria-pressed='true'] { background: var(--amber); color: var(--ink); border-color: var(--amber); }
+  .queue li .swatches span { transition: transform 0.35s var(--ease); }
+  .queue li:hover .swatches span:nth-child(2) { transform: translateX(8px); }
+  .queue li:hover .swatches span:nth-child(3) { transform: translateX(16px); }
+  .queue { list-style: none; margin: clamp(40px, 6vw, 72px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; border-top: 1px solid var(--line-dark); }
+  .queue li { display: grid; grid-template-columns: 30px 70px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line-dark); }
+  .idx { font-family: var(--f-mono); font-size: 11px; color: var(--fog); font-variant-numeric: tabular-nums; }
+  .swatches { display: flex; }
+  .swatches span { width: 22px; height: 22px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px var(--enclosure); }
+  .swatches span + span { margin-left: -6px; }
+  .name { font-family: var(--f-display); font-size: 19px; font-variation-settings: 'wdth' 106, 'wght' 640; }
+  .kind { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--fog); }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: minmax(0, 1fr); }
+    .queue { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+
+<script>
+  const viewer = document.querySelector<HTMLElement>('.print3d');
+  if (viewer) {
+    const load = () => import('../scripts/print3d');
+    let started = false;
+    const start = () => { if (!started) { started = true; load().then((m) => m.mountPrint(viewer)); } };
+    if (document.querySelector('.preloader')) {
+      // first visit: do the one-off WebGL setup while the preloader curtain is still down
+      setTimeout(start, 350);
+    } else if ('IntersectionObserver' in window) {
+      // deep links and return visits: set up (in idle slots) well before the Lab scrolls into view
+      new IntersectionObserver((entries, io) => {
+        if (entries.some((e) => e.isIntersecting)) { io.disconnect(); start(); }
+      }, { rootMargin: '250% 0px' }).observe(viewer);
+    }
+  }
+</script>

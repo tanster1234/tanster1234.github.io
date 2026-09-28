@@ -1,0 +1,122 @@
+/* Tanmay B. — design tokens and base styles.
+   Palette comes from real prints: enclosure graphite, matte PLA bone, filament orange,
+   lamp amber, cobalt. Orange = data + actions only. Amber = light only. Cobalt = links on bone. */
+:root {
+  --enclosure: #15171a;
+  --deep: #0e0f11;
+  --plate: #24272b;
+  --plate-2: #30343a;
+  --bone: #e9e7e1;
+  --bone-2: #dddad2;
+  --ink: #17191c;
+  --slate: #585c63;
+  --fog: #9da1a8;
+  --orange: #f26a1b;
+  --amber: #ffb23f;
+  --cobalt: #2f4be0;
+  --cobalt-lt: #9aabff;
+  --line-light: rgba(23, 25, 28, 0.14);
+  --line-dark: rgba(233, 231, 225, 0.12);
+
+  --f-display: 'Archivo', 'Arial Narrow', Arial, sans-serif;
+  --f-body: 'Hanken Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --f-mono: 'Martian Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --gutter: clamp(16px, 4vw, 56px);
+  --max: 1240px;
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+body {
+  margin: 0;
+  background: var(--bone);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+img, video, canvas { display: block; max-width: 100%; }
+a { color: var(--cobalt); text-underline-offset: 3px; }
+.on-dark a { color: var(--cobalt-lt); }
+:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; border-radius: 2px; }
+::selection { background: var(--orange); color: var(--ink); }
+
+h1, h2, h3, h4 { font-family: var(--f-display); margin: 0; line-height: 0.95; text-wrap: balance; font-weight: 800; }
+p { margin: 0; }
+
+.wrap { max-width: var(--max); margin-inline: auto; padding-inline: var(--gutter); }
+
+.eyebrow {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+.on-dark .eyebrow { color: var(--fog); }
+.eyebrow .semi { color: var(--orange); }
+
+.h-section {
+  font-size: clamp(40px, 6.4vw, 92px);
+  font-variation-settings: 'wdth' 120, 'wght' 800;
+  letter-spacing: -0.02em;
+}
+.lede { font-size: clamp(18px, 1.5vw, 21px); color: var(--slate); max-width: 58ch; }
+.on-dark .lede { color: var(--fog); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 14px 20px; border-radius: 999px; border: 1px solid currentColor;
+  color: inherit; background: transparent; text-decoration: none; cursor: pointer;
+  transition: transform 0.18s var(--ease), background-color 0.18s, color 0.18s, box-shadow 0.3s;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--orange); border-color: var(--orange); color: var(--ink); box-shadow: 0 0 0 0 rgba(242, 106, 27, 0.4); }
+.btn.primary:hover { box-shadow: 0 8px 30px -6px rgba(242, 106, 27, 0.55); }
+.btn.ink { background: var(--ink); border-color: var(--ink); color: var(--bone); }
+.btn .led { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.btn.primary .led { background: var(--ink); }
+
+.chip {
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.03em;
+  padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line-light); color: var(--slate);
+  white-space: nowrap;
+}
+.on-dark .chip { border-color: var(--line-dark); color: var(--fog); }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* split-text reveals (GSAP SplitText adds the masks; nothing is hidden without JS) */
+.split-line-mask, .split-char-mask { padding-bottom: 0.1em; margin-bottom: -0.1em; }
+
+.lab-cover { position: absolute; inset: 0; z-index: 5; background: var(--bone); transform-origin: top; pointer-events: none; will-change: transform; }
+
+/* nozzle cursor: small DOM elements moved with transforms only — no full-screen layer */
+.cursor { position: fixed; left: 0; top: 0; z-index: 70; pointer-events: none; }
+.cursor-dot, .cursor-trail span, .cursor-label { position: absolute; left: 0; top: 0; will-change: transform; }
+.cursor-dot { width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: var(--orange);
+  box-shadow: 0 0 14px 3px rgba(255, 178, 63, 0.45); transition: width 0.2s var(--ease), height 0.2s var(--ease), margin 0.2s var(--ease); }
+.cursor.is-hot .cursor-dot { width: 18px; height: 18px; margin: -9px 0 0 -9px; }
+.cursor-trail span { width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--amber); }
+.cursor-label { margin: 14px 0 0 14px; padding: 6px 10px; border-radius: 999px; background: var(--ink); color: var(--bone);
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap;
+  opacity: 0; transition: opacity 0.2s; }
+.cursor.has-label .cursor-label { opacity: 1; }
+.cursor.is-hidden { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .cursor { display: none; }
+}

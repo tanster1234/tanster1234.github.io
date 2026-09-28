@@ -1,0 +1,57 @@
+---
+import Base from '../../layouts/Base.astro';
+import film from '../../data/film.json';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const seconds = (film.count / film.fps).toFixed(0);
+const steps = [
+  { n: '01', t: 'One idea', d: 'Signal to object: noisy data becomes a forecast, the forecast becomes a printed lamp, and the lamp turns the lights on. Three concepts were pitched and stress-tested by a separate reviewer before any pixels were made.' },
+  { n: '02', t: 'Six keyframes', d: 'Generated stills of one continuous push-in inside a printer enclosure. Each frame was made from the one before it, so light, haze and colour carry through. A garbled label was removed by hand and small push-in crops keep the camera moving forward.' },
+  { n: '03', t: 'Five chained clips', d: 'Each clip is pinned at both ends: it starts on the literal last frame of the previous clip and must land on the next keyframe. A free direction check runs before anything is generated, and every clip is measured for pin fidelity and continuity afterwards.' },
+  { n: '04', t: 'Assembly', d: `Duplicate junction frames and frozen frames are dropped so the scroll never stalls. The result is ${film.count} frames at ${film.width} px, about ${seconds} seconds of footage.` },
+  { n: '05', t: 'Grade', d: 'The generated footage drifted from warm graphite toward a steel blue as the clips went on. Every frame is measured and pulled back to one consistent look, with the orange and amber protected so the glow stays hot.' },
+  { n: '06', t: 'The player', d: 'A canvas draws pre-extracted frames as you scroll. Frames stream in nearest-first, decode off the main thread into a sliding window of image bitmaps, and the playhead eases toward the scroll position. No video element, so no seek stutter.' },
+  { n: '07', t: 'Lights on', d: 'The lamp switching on is done in code over the last frame, so no generated clip had to change its lighting. Visitors who prefer reduced motion get the keyframes as still images instead.' },
+];
+---
+<Base title="How this site was built · Tanmay B." description="The pipeline behind the scroll film on Tanmay B.'s site: keyframes, chained generated clips, frame assembly and a canvas scrub player.">
+  <article class="notes" data-theme="light">
+    <div class="wrap">
+      <p class="eyebrow"><span class="semi">;</span> build notes</p>
+      <h1 class="title">How this site was built</h1>
+      <p class="lede">The opening film is generated footage, directed shot by shot and played back by a custom canvas player. Here is the pipeline, for anyone who wants something similar.</p>
+      <ol class="steps">
+        {steps.map((s) => (
+          <li><span class="n">{s.n}</span><div><h2>{s.t}</h2><p>{s.d}</p></div></li>
+        ))}
+      </ol>
+      <section class="stack">
+        <h2>Stack</h2>
+        <ul>
+          <li><b>Site</b> Astro, static output, hosted on GitHub Pages</li>
+          <li><b>Motion</b> Lenis, GSAP (ScrollTrigger, SplitText), anime.js, and a hand-written canvas scrub engine</li>
+          <li><b>3D</b> three.js for the printed pieces in the Lab</li>
+          <li><b>Imagery</b> Higgsfield: Nano Banana 2 for keyframes, Seedance 2.0 for footage</li>
+          <li><b>Type</b> Archivo (with its width axis), Hanken Grotesk, Martian Mono</li>
+        </ul>
+      </section>
+      <p class="back"><a class="btn ink" href={`${base}/#work-with-me`}>Work with me</a></p>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .notes { background: var(--bone); padding-block: clamp(140px, 20vh, 200px) clamp(80px, 12vh, 140px); min-height: 100vh; }
+  .wrap { max-width: 900px; display: grid; gap: 24px; }
+  .title { font-size: clamp(44px, 7vw, 96px); font-variation-settings: 'wdth' 122, 'wght' 820; letter-spacing: -0.025em; }
+  .steps { list-style: none; margin: 16px 0 0; padding: 0; border-top: 2px solid var(--ink); }
+  .steps li { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 16px; padding: 24px 0; border-bottom: 1px solid var(--line-light); }
+  .n { font-family: var(--f-mono); font-size: 12px; color: var(--orange); padding-top: 6px; }
+  .steps h2 { font-size: 28px; font-variation-settings: 'wdth' 112, 'wght' 760; margin-bottom: 8px; }
+  .steps p { color: var(--slate); font-size: 17px; max-width: 62ch; }
+  .stack { margin-top: 24px; display: grid; gap: 12px; }
+  .stack h2 { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; color: var(--slate); }
+  .stack ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .stack li { font-size: 17px; }
+  .stack b { font-family: var(--f-mono); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--orange); margin-right: 10px; }
+  .back { margin-top: 16px; }
+</style>
