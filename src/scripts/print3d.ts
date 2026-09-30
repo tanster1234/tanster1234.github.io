@@ -110,7 +110,7 @@ export async function mountPrint(host: HTMLElement) {
     if (button) button.textContent = on ? 'Switch off' : 'Switch on';
     host.classList.toggle('is-lit', on);
     host.dataset.cursor = on ? 'Switch it off' : 'Switch it on';
-    document.querySelector('.cursor-label')?.replaceChildren(host.dataset.cursor);
+    document.querySelector('.nozzle-label')?.replaceChildren(host.dataset.cursor);
     kick();
   };
 

@@ -28,7 +28,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://tanster1234
     <meta property="og:image" content={new URL(`${base}/og.jpg`, Astro.site ?? 'https://tanster1234.github.io')} />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="preload" as="font" type="font/woff2" href="/fonts/archivo-normal-latin.woff2" crossorigin />
-    <link rel="preload" as="image" href={`${base}/film/d/f_0001.jpg`} />
+    <link rel="preload" as="image" href={`${base}/film/d/f_0001.webp`} imagesrcset={`${base}/film/m/f_0001.webp 854w, ${base}/film/d/f_0001.webp 1280w`} imagesizes="100vw" />
     <script is:inline>document.documentElement.classList.add('js');</script>
   </head>
   <body>

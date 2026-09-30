@@ -1,18 +1,18 @@
 ---
 // The scroll film. Canvas + pre-extracted JPEG frames, never <video currentTime>.
-// Frames live in /public/film/d/f_0001.jpg ... ; the manifest is written by the assembly step.
+// Frames live in /public/film/{d,m}/f_0001.webp ... (desktop / phone sets); the manifest is written by the assembly step.
 import manifest from '../data/film.json';
 import { person, filmBeats } from '../data/content';
 import Preloader from './Preloader.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 <section id="film" class="film on-dark" aria-label="Opening film" data-theme="dark"
-  data-frames={manifest.count} data-dir={`${base}/film/d/`} data-lit={`${base}/film/lit.jpg`}
+  data-frames={manifest.count} data-dir={`${base}/film/`} data-ext={manifest.ext} data-lit={`${base}/film/lit.jpg`}
   data-remap={JSON.stringify(manifest.remap ?? [])}>
   <Preloader />
   <div class="film-sticky">
     <canvas class="film-canvas" aria-hidden="true"></canvas>
-    <img class="film-poster" src={`${base}/film/d/f_0001.jpg`} alt="" aria-hidden="true" />
+    <img class="film-poster" src={`${base}/film/d/f_0001.webp`} srcset={`${base}/film/m/f_0001.webp 854w, ${base}/film/d/f_0001.webp 1280w`} sizes="100vw" alt="" aria-hidden="true" />
     <div class="film-bloom" aria-hidden="true"></div>
     <div class="film-grain" aria-hidden="true"></div>
     <div class="film-day" aria-hidden="true"></div>

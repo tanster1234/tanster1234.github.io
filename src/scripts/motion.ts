@@ -23,6 +23,8 @@ export function startMotion() {
   gsap.ticker.add((t) => lenis!.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
   (window as any).__lenis = lenis;
+  // hold the page still while the preloader curtain is down
+  if ((window as any).__preloading) { lenis.stop(); window.addEventListener('tb:revealed', () => lenis?.start(), { once: true }); }
   anchors();
   cursor();
   magnetic();
@@ -36,7 +38,6 @@ export function startMotion() {
     labLayers();
     tilt();
     titleWave();
-    arcs();
     ScrollTrigger.refresh();
   };
   // split only after the real fonts are in, so line breaks are final
@@ -85,7 +86,7 @@ function reveals() {
   // section titles: characters rise inside their words
   document.querySelectorAll<HTMLElement>('[data-rise="chars"]').forEach((el) => {
     SplitText.create(el, {
-      type: 'words,chars', mask: 'words', autoSplit: true,
+      type: 'words,chars', mask: 'words', wordsClass: 'split-word', autoSplit: true,
       onSplit(self) {
         return gsap.from(self.chars, {
           yPercent: 115, rotate: 4, duration: 0.95, ease: 'expo.out', stagger: 0.022,
@@ -133,14 +134,6 @@ function counters(immediate: boolean) {
       gsap.to(o, { k: 1, duration: 1.3, ease: 'power3.out', onUpdate: () => { el.innerHTML = parts.map((v) => Math.round(v * o.k)).join('–') + sup; } });
     };
     if (below(el)) ScrollTrigger.create({ trigger: el, start: 'top 88%', once: true, onEnter: run }); else run();
-  });
-}
-
-// the shot arc in Off-court draws itself once it is on screen
-function arcs() {
-  document.querySelectorAll<SVGElement>('.arc').forEach((a) => {
-    if (!below(a)) { a.classList.add('go'); return; }
-    ScrollTrigger.create({ trigger: a, start: 'top 80%', once: true, onEnter: () => a.classList.add('go') });
   });
 }
 
@@ -238,54 +231,72 @@ function titleWave() {
 }
 
 // ---- cursor & buttons ----------------------------------------------------------------------
-// Nozzle tip + a short cooling trail, built from tiny DOM dots (no full-screen canvas).
+// Hot nozzle: a glowing tip that tracks the pointer exactly, with a tapered filament trail that
+// cools from amber to ember. Built from a few small transformed elements (no full-screen layer),
+// and the native cursor is hidden while it is active.
 function cursor() {
   if (!finePointer()) return;
+  const SEG = 18;
   const root = document.createElement('div');
-  root.className = 'cursor is-hidden';
+  root.className = 'nozzle is-hidden';
   root.setAttribute('aria-hidden', 'true');
-  root.innerHTML = `<div class="cursor-trail">${'<span></span>'.repeat(9)}</div><div class="cursor-dot"></div><div class="cursor-label"></div>`;
+  root.innerHTML = `<div class="nozzle-trail">${'<i></i>'.repeat(SEG)}</div>`
+    + '<div class="nozzle-tip"><span class="nozzle-heat"></span><span class="nozzle-core"></span></div><div class="nozzle-label"></div>';
   document.body.appendChild(root);
-  const dot = root.querySelector<HTMLElement>('.cursor-dot')!;
-  const label = root.querySelector<HTMLElement>('.cursor-label')!;
-  const trail = [...root.querySelectorAll<HTMLElement>('.cursor-trail span')];
-  const pts = trail.map(() => ({ x: -200, y: -200 }));
-  let mx = -200, my = -200, x = -200, y = -200, running = false;
+  document.documentElement.classList.add('has-nozzle');
+  const tip = root.querySelector<HTMLElement>('.nozzle-tip')!;
+  const label = root.querySelector<HTMLElement>('.nozzle-label')!;
+  const segs = [...root.querySelectorAll<HTMLElement>('.nozzle-trail i')];
+  segs.forEach((el, i) => {
+    const k = i / (SEG - 1);
+    el.style.setProperty('--t', `${(4.2 - 3.2 * k).toFixed(2)}px`);
+    el.style.setProperty('--o', (0.95 - 0.85 * k).toFixed(2));
+    el.style.setProperty('--c', k < 0.25 ? '#FFC05A' : k < 0.6 ? '#F26A1B' : '#B8420C');
+  });
+  const pts = Array.from({ length: SEG + 1 }, () => ({ x: -200, y: -200 }));
+  let mx = -200, my = -200, running = false;
 
+  const place = () => {
+    const t = `translate3d(${mx}px, ${my}px, 0)`;
+    tip.style.transform = t; label.style.transform = t;
+  };
   const loop = () => {
-    x += (mx - x) * 0.55; y += (my - y) * 0.55;
-    const t = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
-    dot.style.transform = t; label.style.transform = t;
-    let px = x, py = y, spread = 0;
-    pts.forEach((p, i) => {
-      p.x += (px - p.x) * 0.42; p.y += (py - p.y) * 0.42;
-      const s = 1 - i / pts.length;
-      trail[i].style.transform = `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0) scale(${(0.35 + 0.65 * s).toFixed(2)})`;
-      trail[i].style.opacity = (0.5 * s).toFixed(2);
-      trail[i].style.background = i < 3 ? '#FFB23F' : '#F26A1B';
-      spread += Math.abs(px - p.x) + Math.abs(py - p.y);
-      px = p.x; py = p.y;
-    });
-    running = spread + Math.abs(mx - x) + Math.abs(my - y) > 0.6;
+    pts[0].x = mx; pts[0].y = my;
+    let total = 0;
+    for (let i = 1; i <= SEG; i++) {
+      const p = pts[i], q = pts[i - 1];
+      p.x += (q.x - p.x) * 0.42; p.y += (q.y - p.y) * 0.42;
+      const dx = q.x - p.x, dy = q.y - p.y, len = Math.hypot(dx, dy);
+      total += len;
+      segs[i - 1].style.transform = `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0) rotate(${Math.atan2(dy, dx).toFixed(3)}rad) scaleX(${((len + 0.6) / 10).toFixed(3)})`;
+    }
+    running = total > 0.8;
     if (running) requestAnimationFrame(loop);
   };
   window.addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse') return;
     mx = e.clientX; my = e.clientY;
     if (root.classList.contains('is-hidden')) {
-      root.classList.remove('is-hidden'); x = mx; y = my;
+      root.classList.remove('is-hidden');
       pts.forEach((p) => { p.x = mx; p.y = my; });
     }
+    place();
     if (!running) { running = true; requestAnimationFrame(loop); }
   }, { passive: true });
+  window.addEventListener('pointerdown', () => root.classList.add('is-down'));
+  window.addEventListener('pointerup', () => root.classList.remove('is-down'));
   document.documentElement.addEventListener('pointerleave', () => root.classList.add('is-hidden'));
   window.addEventListener('blur', () => root.classList.add('is-hidden'));
 
   document.addEventListener('pointerover', (e) => {
-    const el = (e.target as HTMLElement).closest<HTMLElement>('[data-cursor], a, button, summary');
-    root.classList.toggle('is-hot', !!el);
+    const target = e.target as HTMLElement;
+    const typing = !!target.closest('input, textarea, select, [contenteditable]');
+    root.classList.toggle('is-typing', typing);
+    const el = target.closest<HTMLElement>('[data-cursor], a, button, summary, [role="tab"]');
+    root.classList.toggle('is-hot', !!el && !typing);
     const text = el?.dataset.cursor ?? (el?.matches('a[target="_blank"]') ? 'Open ↗' : '');
     label.textContent = text;
-    root.classList.toggle('has-label', !!text);
+    root.classList.toggle('has-label', !!text && !typing);
   });
 }
 

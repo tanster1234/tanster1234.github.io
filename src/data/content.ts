@@ -43,7 +43,7 @@ export const roles: Role[] = [
   {
     when: '2023 – now',
     role: 'Data Scientist',
-    org: 'OpsVeda',
+    org: 'Aptean',
     place: 'Greensboro, NC',
     current: true,
     summary: 'Forecasting and promotion analytics for apparel and CPG brands, plus private LLM agents over company data.',
@@ -52,22 +52,7 @@ export const roles: Role[] = [
       'Designed a promotion-effectiveness framework that measures price and cross-elasticity across 30M transactions, with forecast baselines for uplift. Promotional ROI improved 20%.',
       'Shipped a secure local LLM agent (Ollama, Qdrant, LangChain, MCP) that answers questions over databases and documents in plain language, cutting query time by 40–50%.',
     ],
-    stack: ['Python', 'statsmodels', 'XGBoost', 'PyTorch', 'LangChain', 'MCP', 'Ollama', 'Qdrant'],
-  },
-  {
-    when: 'Dates to confirm',
-    role: 'Go Developer',
-    org: 'High-frequency trading firm',
-    datesPending: true,
-    summary: 'Low-latency systems in Go for a trading environment.',
-    stack: ['Go'],
-  },
-  {
-    when: 'Dates to confirm',
-    role: 'Systems automation',
-    org: 'Wells Fargo',
-    datesPending: true,
-    summary: 'Automated banking systems and the processes around them.',
+    stack: ['Python', 'statsmodels', 'XGBoost', 'LSTM', 'LangChain', 'MCP', 'Ollama', 'Qdrant'],
   },
   {
     when: '2022',
@@ -104,6 +89,21 @@ export const roles: Role[] = [
       'Served on AWS SageMaker behind a REST API, with a React app that maps relationships in any article in real time.',
     ],
     stack: ['BERT', 'NLTK', 'SageMaker', 'React'],
+  },
+  {
+    when: 'Dates to confirm',
+    role: 'Systems automation',
+    org: 'Wells Fargo',
+    datesPending: true,
+    summary: 'Automated banking systems and the processes around them.',
+  },
+  {
+    when: 'Dates to confirm',
+    role: 'Go Developer',
+    org: 'High-frequency trading firm',
+    datesPending: true,
+    summary: 'Low-latency systems in Go for a trading environment.',
+    stack: ['Go'],
   },
   {
     when: '2017',
@@ -186,11 +186,64 @@ export const projects: Project[] = [
   },
 ];
 
-export const stack = [
-  { use: 'Forecast & model', items: ['Python', 'statsmodels', 'scikit-learn', 'XGBoost', 'PyTorch', 'TensorFlow'] },
-  { use: 'Agents & LLMs', items: ['LangGraph', 'MCP servers & clients', 'Ollama', 'Qdrant', 'RAG', 'Hugging Face'] },
-  { use: 'Stream & store', items: ['Kafka', 'TimescaleDB', 'PostgreSQL', 'AWS Lambda, S3, SageMaker'] },
-  { use: 'Ship', items: ['Go', 'Node.js', 'React', 'Vue / Nuxt', 'Docker', 'Astro'] },
+export type Tool = { name: string; used?: string[] };
+export type StackLayer = { id: string; name: string; blurb: string; tone: 'bone' | 'amber' | 'orange' | 'graphite'; tools: Tool[] };
+
+// Bottom to top, in the order data moves: it comes in, gets modelled, gets an interface, ships.
+// "used" only names places stated in the CV or by Tanmay; everything else is simply in the toolbox.
+export const stackLayers: StackLayer[] = [
+  {
+    id: 'data', name: 'Stream & store', tone: 'graphite',
+    blurb: 'Getting data in, fast and reliably, and keeping it where the models can reach it.',
+    tools: [
+      { name: 'Kafka', used: ['Energy Ogre'] },
+      { name: 'TimescaleDB', used: ['Energy Ogre'] },
+      { name: 'PostgreSQL', used: ['HKU', 'SQL over MCP'] },
+      { name: 'AWS Lambda · S3', used: ['Energy Ogre'] },
+      { name: 'SageMaker', used: ['HKUST'] },
+    ],
+  },
+  {
+    id: 'model', name: 'Forecast & model', tone: 'orange',
+    blurb: 'Forecasting and machine learning at the scale of millions of time series.',
+    tools: [
+      { name: 'Python', used: ['Aptean', 'Exercise classifier'] },
+      { name: 'statsmodels', used: ['Aptean'] },
+      { name: 'XGBoost', used: ['Aptean'] },
+      { name: 'scikit-learn' },
+      { name: 'PyTorch' },
+      { name: 'TensorFlow · Keras' },
+      { name: 'NLTK', used: ['HKUST'] },
+      { name: 'BERT', used: ['HKUST'] },
+    ],
+  },
+  {
+    id: 'agents', name: 'Agents & LLMs', tone: 'amber',
+    blurb: 'Language models that can use tools, reach private data and act on it.',
+    tools: [
+      { name: 'MCP servers & clients', used: ['Aptean', 'TV Remote MCP', 'SQL over MCP'] },
+      { name: 'LangChain', used: ['Aptean'] },
+      { name: 'Ollama', used: ['Aptean'] },
+      { name: 'Qdrant', used: ['Aptean'] },
+      { name: 'LangGraph' },
+      { name: 'RAG' },
+      { name: 'FastAgent' },
+      { name: 'Hugging Face' },
+    ],
+  },
+  {
+    id: 'ship', name: 'Ship', tone: 'bone',
+    blurb: 'The services, apps and sites people actually open.',
+    tools: [
+      { name: 'Go', used: ['Trading firm'] },
+      { name: 'Node.js', used: ['HKU', 'HKUST'] },
+      { name: 'React', used: ['HKUST'] },
+      { name: 'Vue · Nuxt', used: ['HKU'] },
+      { name: '.NET', used: ['Energy Ogre'] },
+      { name: 'Docker' },
+      { name: 'Astro', used: ['This site'] },
+    ],
+  },
 ];
 
 export const lab = {

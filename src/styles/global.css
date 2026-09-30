@@ -30,7 +30,8 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scrollbar-gutter: stable; }
+html.is-loading { overflow: hidden; }
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-stopped { overflow: hidden; }
@@ -100,23 +101,33 @@ p { margin: 0; }
 
 /* split-text reveals (GSAP SplitText adds the masks; nothing is hidden without JS) */
 .split-line-mask, .split-char-mask { padding-bottom: 0.1em; margin-bottom: -0.1em; }
+.split-word, .split-word-mask { white-space: nowrap; }
 
 .lab-cover { position: absolute; inset: 0; z-index: 5; background: var(--bone); transform-origin: top; pointer-events: none; will-change: transform; }
 
-/* nozzle cursor: small DOM elements moved with transforms only — no full-screen layer */
-.cursor { position: fixed; left: 0; top: 0; z-index: 70; pointer-events: none; }
-.cursor-dot, .cursor-trail span, .cursor-label { position: absolute; left: 0; top: 0; will-change: transform; }
-.cursor-dot { width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: var(--orange);
-  box-shadow: 0 0 14px 3px rgba(255, 178, 63, 0.45); transition: width 0.2s var(--ease), height 0.2s var(--ease), margin 0.2s var(--ease); }
-.cursor.is-hot .cursor-dot { width: 18px; height: 18px; margin: -9px 0 0 -9px; }
-.cursor-trail span { width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--amber); }
-.cursor-label { margin: 14px 0 0 14px; padding: 6px 10px; border-radius: 999px; background: var(--ink); color: var(--bone);
+/* hot-nozzle cursor: small transformed elements only — no full-screen layer */
+html.has-nozzle, html.has-nozzle * { cursor: none !important; }
+html.has-nozzle :is(input, textarea, select, [contenteditable]) { cursor: auto !important; }
+.nozzle { position: fixed; left: 0; top: 0; z-index: 9999; pointer-events: none; transition: opacity 0.2s; }
+.nozzle.is-hidden, .nozzle.is-typing { opacity: 0; }
+.nozzle-tip, .nozzle-label, .nozzle-trail i { position: absolute; left: 0; top: 0; will-change: transform; }
+.nozzle-heat { position: absolute; width: 36px; height: 36px; margin: -18px 0 0 -18px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 190, 90, 0.55), rgba(242, 106, 27, 0.2) 45%, rgba(242, 106, 27, 0) 70%);
+  transition: transform 0.25s var(--ease); }
+.nozzle-core { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffe0a8, #f26a1b 55%, #b8420c); box-shadow: 0 0 10px 2px rgba(255, 150, 40, 0.65);
+  transition: transform 0.2s var(--ease); }
+.nozzle.is-hot .nozzle-heat { transform: scale(1.7); }
+.nozzle.is-hot .nozzle-core { transform: scale(1.4); }
+.nozzle.is-down .nozzle-core { transform: scale(0.75); }
+.nozzle-trail i { width: 10px; height: var(--t, 3px); margin-top: calc(var(--t, 3px) / -2); border-radius: 99px; transform-origin: 0 50%;
+  background: var(--c, #f26a1b); opacity: var(--o, 0.6); box-shadow: 0 0 6px rgba(255, 150, 40, 0.35); }
+.nozzle-label { margin: 16px 0 0 16px; padding: 6px 10px; border-radius: 999px; background: var(--ink); color: var(--bone);
   font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap;
   opacity: 0; transition: opacity 0.2s; }
-.cursor.has-label .cursor-label { opacity: 1; }
-.cursor.is-hidden { opacity: 0; }
+.nozzle.has-label .nozzle-label { opacity: 1; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-  .cursor { display: none; }
+  .nozzle { display: none; }
 }

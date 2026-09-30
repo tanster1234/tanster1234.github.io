@@ -1,31 +1,212 @@
 ---
-import { stack } from '../data/content';
+// The stack, printed: four isometric layers (bottom → top in the order data moves).
+// Pick a layer to lift it, trace its perimeter like a nozzle, and see its tools as keycaps.
+import { stackLayers } from '../data/content';
+
+const W = 380, H = 190, T = 34;           // rhombus width/height (2:1 iso) and slab thickness
+const P = (u: number, v: number) => [((u - v) * W) / 2, ((u + v - 1) * H) / 2];
+const pt = (a: number[]) => `${a[0].toFixed(1)},${a[1].toFixed(1)}`;
+const top = [P(0, 0), P(1, 0), P(1, 1), P(0, 1)].map(pt).join(' ');
+const left = [[-W / 2, 0], [0, H / 2], [0, H / 2 + T], [-W / 2, T]].map(pt).join(' ');
+const right = [[0, H / 2], [W / 2, 0], [W / 2, T], [0, H / 2 + T]].map(pt).join(' ');
+// perimeter "walls" a little inside the edge, and infill that alternates direction per layer like a real print
+const inset = (k: number) => [P(k, k), P(1 - k, k), P(1 - k, 1 - k), P(k, 1 - k)].map(pt).join(' ');
+const infill = (odd: boolean) => Array.from({ length: 13 }, (_, i) => {
+  const c = 0.1 + (0.8 * (i + 0.5)) / 13;
+  return odd ? `M${pt(P(0.1, c))}L${pt(P(0.9, c))}` : `M${pt(P(c, 0.1))}L${pt(P(c, 0.9))}`;
+}).join('');
+const sideLines = (face: 'l' | 'r') => Array.from({ length: Math.floor(T / 3) - 1 }, (_, i) => {
+  const y = 3 * (i + 1);
+  return face === 'l' ? `M${-W / 2},${y}L0,${H / 2 + y}` : `M0,${H / 2 + y}L${W / 2},${y}`;
+}).join('');
+const perimeterPath = `M${pt(P(0.05, 0.05))}L${pt(P(0.95, 0.05))}L${pt(P(0.95, 0.95))}L${pt(P(0.05, 0.95))}Z`;
+const defaultId = 'model';
+const tabs = [...stackLayers].reverse(); // read top to bottom
 ---
 <section id="stack" class="stack" data-theme="light">
   <div class="wrap">
     <header class="head">
       <p class="eyebrow"><span class="semi">;</span> layer 03 · stack</p>
-      <h2 class="h-section" data-rise="chars">Tools, by job</h2>
+      <h2 class="h-section" data-rise="chars">The stack, printed</h2>
+      <p class="lede">Built from the bottom up: how data comes in, gets modelled, gets an interface and ships.</p>
     </header>
-    <div class="cols">
-      {stack.map((g) => (
-        <div class="col">
-          <h3>{g.use}</h3>
-          <ul>{g.items.map((i) => <li>{i}</li>)}</ul>
+
+    <div class="grid">
+      <div class="iso" aria-hidden="true">
+        <svg class="iso-svg" viewBox="-40 0 680 600" data-stack>
+          {stackLayers.map((l, i) => (
+            <g class="slab-pos" data-i={i} transform={`translate(260 ${470 - i * (T + 26)})`}>
+              <g class:list={['slab', `tone-${l.tone}`, { active: l.id === defaultId, lifted: i >= stackLayers.findIndex((x) => x.id === defaultId) }]} data-id={l.id}>
+                <polygon class="f-left" points={left} />
+                <polygon class="f-right" points={right} />
+                <path class="f-lines" d={sideLines('l') + sideLines('r')} />
+                <polygon class="f-top" points={top} />
+                <path class="f-infill" d={infill(i % 2 === 1)} />
+                <polygon class="f-wall" points={inset(0.05)} />
+                <polygon class="f-wall" points={inset(0.09)} />
+                <path class="f-trace" d={perimeterPath} pathLength="1" />
+                <g class="f-label" transform={`translate(${W / 2 + 16} ${T / 2 + 4})`}>
+                  <line x1="-12" y1="-4" x2="-2" y2="-4" />
+                  <text x="2" y="0">{l.name}</text>
+                </g>
+              </g>
+            </g>
+          ))}
+        </svg>
+      </div>
+
+      <div class="panel">
+        <div class="tabs" role="tablist" aria-label="Stack layers, top to bottom">
+          {tabs.map((l) => (
+            <button class:list={['tab', `tone-${l.tone}`]} role="tab" id={`tab-${l.id}`} aria-controls={`panel-${l.id}`}
+              aria-selected={l.id === defaultId ? 'true' : 'false'} tabindex={l.id === defaultId ? 0 : -1} data-id={l.id} type="button">
+              <span class="chip-dot" aria-hidden="true"></span>{l.name}
+            </button>
+          ))}
         </div>
-      ))}
+        {stackLayers.map((l) => (
+          <div class="layer-panel" role="tabpanel" id={`panel-${l.id}`} aria-labelledby={`tab-${l.id}`} hidden={l.id !== defaultId}>
+            <p class="blurb">{l.blurb}</p>
+            <ul class="keys">
+              {l.tools.map((t) => (
+                <li class:list={['key', `tone-${l.tone}`]}>
+                  <span class="k-name">{t.name}</span>
+                  {t.used ? <span class="k-used">{t.used.join(' · ')}</span> : <span class="k-used muted">Toolbox</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
     </div>
   </div>
 </section>
 
 <style>
-  .stack { background: var(--bone); padding-block: clamp(80px, 12vh, 140px); border-top: 1px solid var(--line-light); }
-  .head { display: grid; gap: 18px; margin-bottom: clamp(32px, 4vw, 56px); }
-  .cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; }
-  .col { border-top: 2px solid var(--ink); padding-top: 16px; display: grid; gap: 12px; align-content: start; }
-  .col h3 { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; color: var(--slate); }
-  .col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-  .col li { font-family: var(--f-display); font-size: clamp(19px, 1.6vw, 23px); font-variation-settings: 'wdth' 106, 'wght' 620; line-height: 1.2; }
-  @media (max-width: 900px) { .cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (max-width: 480px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+  .stack { background: var(--bone); padding-block: clamp(88px, 13vh, 150px); border-top: 1px solid var(--line-light); }
+  .head { display: grid; gap: 18px; margin-bottom: clamp(24px, 3vw, 40px); }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(24px, 4vw, 64px); align-items: center; }
+  .iso-svg { width: 100%; height: auto; overflow: visible; max-width: 100%; }
+
+  /* slab faces by filament colour */
+  .slab { transition: transform 0.55s var(--ease), opacity 0.4s; cursor: pointer; }
+  .slab .f-lines { fill: none; stroke-width: 1; }
+  .slab .f-infill { fill: none; stroke-width: 1.4; }
+  .slab .f-wall { fill: none; stroke-width: 1.2; }
+  .slab .f-trace { fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0;
+    filter: drop-shadow(0 0 4px rgba(255, 178, 63, 0.9)); }
+  .slab .f-label line { stroke: var(--slate); stroke-width: 1; }
+  .slab .f-label text { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; fill: var(--slate); }
+  .slab.active .f-label text { fill: var(--ink); font-weight: 600; }
+  .slab.active .f-label line { stroke: var(--orange); stroke-width: 2; }
+  .slab.lifted { transform: translateY(-26px); }
+  .iso-svg.has-active .slab:not(.active) .f-label text { fill: var(--fog); }
+
+  .tone-graphite .f-top { fill: #34383e; } .tone-graphite .f-left { fill: #25282c; } .tone-graphite .f-right { fill: #1b1d20; }
+  .tone-graphite .f-infill { stroke: rgba(154, 171, 255, 0.4); } .tone-graphite .f-wall { stroke: rgba(233, 231, 225, 0.3); } .tone-graphite .f-lines { stroke: rgba(255, 255, 255, 0.07); }
+  .tone-orange .f-top { fill: #f26a1b; } .tone-orange .f-left { fill: #cf5813; } .tone-orange .f-right { fill: #ad480d; }
+  .tone-orange .f-infill { stroke: rgba(255, 255, 255, 0.3); } .tone-orange .f-wall { stroke: rgba(255, 255, 255, 0.38); } .tone-orange .f-lines { stroke: rgba(0, 0, 0, 0.13); }
+  .tone-amber .f-top { fill: #ffb23f; } .tone-amber .f-left { fill: #e2962c; } .tone-amber .f-right { fill: #c27d20; }
+  .tone-amber .f-infill { stroke: rgba(255, 255, 255, 0.38); } .tone-amber .f-wall { stroke: rgba(255, 255, 255, 0.45); } .tone-amber .f-lines { stroke: rgba(0, 0, 0, 0.12); }
+  .tone-bone .f-top { fill: #f3f0ea; } .tone-bone .f-left { fill: #d8d4cb; } .tone-bone .f-right { fill: #c5c1b8; }
+  .tone-bone .f-infill { stroke: rgba(23, 25, 28, 0.13); } .tone-bone .f-wall { stroke: rgba(23, 25, 28, 0.2); } .tone-bone .f-lines { stroke: rgba(0, 0, 0, 0.07); }
+
+  /* panel */
+  .panel { display: grid; gap: 20px; align-content: start; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tab { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line-light);
+    background: transparent; color: var(--ink); font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .tab[aria-selected='true'] { background: var(--ink); color: var(--bone); border-color: var(--ink); }
+  .chip-dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15); }
+  .tab.tone-graphite .chip-dot { background: #34383e; } .tab.tone-orange .chip-dot { background: var(--orange); }
+  .tab.tone-amber .chip-dot { background: var(--amber); } .tab.tone-bone .chip-dot { background: #f3f0ea; }
+  .blurb { font-size: 18px; color: var(--slate); max-width: 44ch; }
+  .keys { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 14px 12px; }
+  .key { position: relative; display: grid; gap: 6px; padding: 14px 14px 15px; border-radius: 11px; background: #f7f5f0;
+    border: 1px solid rgba(23, 25, 28, 0.1); box-shadow: 0 5px 0 #d3cec4, 0 8px 18px -8px rgba(23, 25, 28, 0.35);
+    transition: transform 0.12s ease, box-shadow 0.12s ease; }
+  .key::before { content: ''; position: absolute; left: 14px; top: 0; width: 26px; height: 3px; border-radius: 0 0 3px 3px; background: var(--k, var(--orange)); }
+  .key:hover { transform: translateY(4px); box-shadow: 0 1px 0 #d3cec4, 0 3px 8px -4px rgba(23, 25, 28, 0.3); }
+  .key.tone-graphite { --k: #34383e; } .key.tone-orange { --k: var(--orange); } .key.tone-amber { --k: var(--amber); } .key.tone-bone { --k: #b9b4aa; }
+  .k-name { font-family: var(--f-display); font-size: 19px; font-variation-settings: 'wdth' 106, 'wght' 680; line-height: 1.1; }
+  .k-used { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--orange); }
+  .k-used.muted { color: var(--fog); }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: minmax(0, 1fr); }
+    .iso { max-width: 460px; margin-inline: auto; width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) { .slab, .key { transition: none; } }
 </style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { animate, stagger } from 'animejs';
+  gsap.registerPlugin(ScrollTrigger);
+
+  const root = document.querySelector<HTMLElement>('#stack');
+  const svg = root?.querySelector<SVGSVGElement>('[data-stack]');
+  if (root && svg) {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const T = 34;
+    const slabs = [...svg.querySelectorAll<SVGGElement>('.slab')];
+    const posGroups = [...svg.querySelectorAll<SVGGElement>('.slab-pos')];
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('.tab')];
+    svg.classList.add('has-active');
+
+    // exploded view opens up as the section scrolls through
+    const place = (gap: number) => posGroups.forEach((g) => {
+      const i = Number(g.dataset.i);
+      g.setAttribute('transform', `translate(260 ${470 - i * (T + gap)})`);
+    });
+    if (reduce) place(46);
+    else {
+      const s = { gap: 2 };
+      place(s.gap);
+      gsap.to(s, { gap: 58, ease: 'none', onUpdate: () => place(s.gap),
+        scrollTrigger: { trigger: svg, start: 'top 85%', end: 'center 45%', scrub: 0.6 } });
+    }
+
+    const trace = (slab: SVGGElement) => {
+      const path = slab.querySelector<SVGPathElement>('.f-trace');
+      if (!path || reduce) return;
+      animate(path, { strokeDashoffset: [1, 0], opacity: [{ to: 1, duration: 80 }, { to: 1, duration: 900 }, { to: 0, duration: 500 }], duration: 900, ease: 'inOutSine' });
+    };
+
+    const select = (id: string, focus = false) => {
+      const ai = slabs.findIndex((s) => s.dataset.id === id);
+      slabs.forEach((s, i) => { s.classList.toggle('active', i === ai); s.classList.toggle('lifted', i >= ai); });
+      tabs.forEach((t) => {
+        const on = t.dataset.id === id;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        if (on && focus) t.focus();
+      });
+      root.querySelectorAll<HTMLElement>('.layer-panel').forEach((p) => { p.hidden = p.id !== `panel-${id}`; });
+      const slab = slabs.find((s) => s.dataset.id === id);
+      if (slab) trace(slab);
+      const keys = root.querySelectorAll(`#panel-${id} .key`);
+      if (!reduce && keys.length) animate(keys, { opacity: [0, 1], translateY: [10, 0], delay: stagger(40), duration: 420, ease: 'outQuad' });
+    };
+
+    let current = 'model';
+    const choose = (id: string, focus = false) => { if (id !== current) { current = id; select(id, focus); } };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => choose(t.dataset.id!));
+      t.addEventListener('keydown', (e) => {
+        const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (!d) return;
+        e.preventDefault();
+        choose(tabs[(i + d + tabs.length) % tabs.length].dataset.id!, true);
+      });
+    });
+    slabs.forEach((s) => {
+      s.addEventListener('click', () => choose(s.dataset.id!));
+      let t = 0;
+      s.addEventListener('pointerenter', (e) => { if ((e as PointerEvent).pointerType === 'mouse') { clearTimeout(t); t = window.setTimeout(() => choose(s.dataset.id!), 140); } });
+      s.addEventListener('pointerleave', () => clearTimeout(t));
+    });
+    // first trace when the stack comes into view
+    ScrollTrigger.create({ trigger: svg, start: 'top 60%', once: true, onEnter: () => { const s = slabs.find((x) => x.dataset.id === current); if (s) trace(s); } });
+  }
+</script>

@@ -27,7 +27,10 @@ export function startFilm(section: HTMLElement | null) {
   if (reduce) { window.__ready = true; return; }
 
   const COUNT = Number(section.dataset.frames);
-  const DIR = section.dataset.dir!;
+  // desktop set at the footage's native 1280 px; phones get a lighter 854 px set
+  const SET = window.innerWidth * Math.min(1.5, window.devicePixelRatio || 1) > 1000 ? 'd' : 'm';
+  const DIR = `${section.dataset.dir!}${SET}/`;
+  const EXT = section.dataset.ext || 'webp';
   const remap: [number, number][] = JSON.parse(section.dataset.remap || '[]');
   const canvas = section.querySelector<HTMLCanvasElement>('.film-canvas')!;
   const ctx = canvas.getContext('2d')!;
@@ -46,7 +49,7 @@ export function startFilm(section: HTMLElement | null) {
   const bar = section.querySelector<HTMLElement>('.film-load .bar');
   const cue = section.querySelector<HTMLElement>('.scroll-cue');
 
-  const src = (i: number) => `${DIR}f_${String(i + 1).padStart(4, '0')}.jpg`;
+  const src = (i: number) => `${DIR}f_${String(i + 1).padStart(4, '0')}.${EXT}`;
   const images: (HTMLImageElement | undefined)[] = new Array(COUNT);
   const state = new Uint8Array(COUNT); // 0 idle, 1 loading, 2 ready, 3 failed
   const bitmaps = new Map<number, ImageBitmap>();
@@ -128,6 +131,8 @@ export function startFilm(section: HTMLElement | null) {
     const sCover = Math.max(cw / iw, ch / ih), sFit = Math.min(cw / iw, ch / ih);
     const s = Math.min(sCover, sFit / (1 - MAX_CROP));
     const w = iw * s, h = ih * s;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.fillStyle = '#0e0f11';
     ctx.fillRect(0, 0, cw, ch);
     ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
@@ -209,7 +214,12 @@ export function startFilm(section: HTMLElement | null) {
   window.__film = { progress: sectionProgress, frame: () => displayed };
   const settle = () => {
     const idx = Math.round(current);
-    if (bitmaps.has(idx) && displayed === idx) { window.__ready = true; return; }
+    if (bitmaps.has(idx) && displayed === idx) {
+      (window as any).__filmReady = true;
+      // with the preloader up, the page is ready for the visitor only once the curtain lifts
+      if (!document.querySelector('.preloader')) window.__ready = true;
+      return;
+    }
     kick(); setTimeout(settle, 60);
   };
   settle();

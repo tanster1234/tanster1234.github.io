@@ -1,45 +1,70 @@
 ---
-// Short and personal. Only facts the owner has confirmed.
+// Short and personal, plus a playable court. Only facts the owner has confirmed.
 ---
-<section id="off-court" class="court on-dark" data-theme="dark">
+<section id="off-court" class="court-sec on-dark" data-theme="dark">
   <div class="wrap grid">
     <div class="copy">
       <p class="eyebrow"><span class="semi">;</span> layer 05 · off-court</p>
       <h2 class="h-section" data-rise="chars">Off-court</h2>
       <p class="lede">Knicks fan and fantasy hoops regular. I printed our league's trophy, and a HueForge poster of the Knicks' Finals run.</p>
+      <p class="how">Your turn. Drag back anywhere on the court and let go to shoot. Ten shots a game; anything from behind the dashed line is worth three.</p>
     </div>
-    <svg class="arc" viewBox="0 0 600 360" role="img" aria-label="A shot arc drawn as a fitted curve landing in a hoop">
-      <defs>
-        <linearGradient id="arcfade" x1="0" x2="1"><stop offset="0" stop-color="#e9e7e1" stop-opacity=".2" /><stop offset="1" stop-color="#f26a1b" /></linearGradient>
-      </defs>
-      <g stroke="rgba(233,231,225,.12)" stroke-width="1">
-        <line x1="20" y1="320" x2="580" y2="320" />
-        <line x1="20" y1="240" x2="580" y2="240" stroke-dasharray="2 6" />
-        <line x1="20" y1="160" x2="580" y2="160" stroke-dasharray="2 6" />
-        <line x1="20" y1="80" x2="580" y2="80" stroke-dasharray="2 6" />
-      </g>
-      <g fill="#9da1a8" opacity=".85">
-        <circle cx="60" cy="286" r="3" /><circle cx="110" cy="214" r="3" /><circle cx="162" cy="160" r="3" />
-        <circle cx="214" cy="120" r="3" /><circle cx="268" cy="98" r="3" /><circle cx="322" cy="92" r="3" />
-        <circle cx="376" cy="104" r="3" /><circle cx="430" cy="132" r="3" />
-      </g>
-      <path class="fit" d="M60 290 Q 300 -30 520 212" fill="none" stroke="url(#arcfade)" stroke-width="3" stroke-linecap="round" />
-      <g stroke="#e9e7e1" stroke-width="3" fill="none" stroke-linecap="round">
-        <line x1="560" y1="150" x2="560" y2="320" />
-        <line x1="560" y1="200" x2="532" y2="200" />
-        <ellipse cx="515" cy="204" rx="22" ry="5" stroke="#f26a1b" />
-      </g>
-      <text x="24" y="346" fill="#9da1a8" font-family="Martian Mono, monospace" font-size="11">fit: y = ax² + bx + c</text>
-    </svg>
+
+    <div class="game" data-court>
+      <div class="hud" aria-live="polite">
+        <span>Score <b data-score>0</b></span>
+        <span>Shot <b data-shot>1 / 10</b></span>
+        <span>Best <b data-best>0</b></span>
+        <button class="hud-btn" type="button" data-new>New game</button>
+      </div>
+      <canvas tabindex="0" role="img" data-cursor="Drag back to shoot"
+        aria-label="Basketball mini game. Drag back and release to shoot, or use the arrow keys to aim and Space to shoot."></canvas>
+      <p class="call" data-call aria-live="assertive"></p>
+      <div class="over" data-over hidden>
+        <span class="eyebrow">Final score</span>
+        <b data-final>0</b>
+        <button class="btn primary" type="button" data-new><span class="led"></span>New game</button>
+      </div>
+    </div>
   </div>
 </section>
 
 <style>
-  .court { background: var(--deep); color: var(--bone); padding-block: clamp(96px, 14vh, 160px); border-top: 1px solid var(--line-dark); }
-  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 72px); align-items: center; }
+  .court-sec { background: var(--deep); color: var(--bone); padding-block: clamp(96px, 14vh, 160px); border-top: 1px solid var(--line-dark); }
+  .grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.25fr); gap: clamp(28px, 5vw, 72px); align-items: center; }
   .copy { display: grid; gap: 20px; }
-  .arc { width: 100%; height: auto; }
-  .js .arc .fit { stroke-dasharray: 700; stroke-dashoffset: 700; transition: stroke-dashoffset 1.6s var(--ease); }
-  .js .arc.go .fit { stroke-dashoffset: 0; }
+  .copy :global(.h-section) { font-size: clamp(40px, 5.4vw, 84px); }
+  .how { font-size: 15.5px; color: var(--fog); max-width: 42ch; border-left: 2px solid var(--orange); padding-left: 14px; }
+  .game { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--line-dark); background: #0e0f11;
+    box-shadow: 0 40px 120px -60px rgba(242, 106, 27, 0.45); }
+  .game canvas { display: block; width: 100%; aspect-ratio: 16 / 10; max-width: 100%; touch-action: none; outline: none; }
+  .game canvas:focus-visible { box-shadow: inset 0 0 0 2px var(--orange); }
+  .hud { position: absolute; left: 12px; right: 12px; top: 12px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--fog); pointer-events: none; }
+  .hud b { color: var(--bone); font-weight: 600; font-variant-numeric: tabular-nums; margin-left: 4px; }
+  .hud span:first-child b { color: var(--orange); }
+  .hud-btn { margin-left: auto; pointer-events: auto; font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--bone);
+    background: rgba(233, 231, 225, 0.06); border: 1px solid var(--line-dark); border-radius: 999px; padding: 6px 12px; }
+  .hud-btn:hover { border-color: var(--orange); }
+  .call { position: absolute; left: 50%; top: 22%; transform: translate(-50%, 8px); margin: 0; pointer-events: none;
+    font-family: var(--f-display); font-size: clamp(26px, 3.4vw, 44px); font-variation-settings: 'wdth' 122, 'wght' 820;
+    color: var(--bone); opacity: 0; transition: opacity 0.25s, transform 0.35s var(--ease); white-space: nowrap; text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6); }
+  .call.on { opacity: 1; transform: translate(-50%, 0); }
+  .over { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 10px; background: rgba(14, 15, 17, 0.78);
+    backdrop-filter: none; text-align: center; }
+  .over[hidden] { display: none; }
+  .over b { font-family: var(--f-display); font-size: clamp(56px, 8vw, 96px); font-variation-settings: 'wdth' 122, 'wght' 820; line-height: 1; color: var(--orange); }
   @media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
 </style>
+
+<script>
+  const host = document.querySelector<HTMLElement>('[data-court]');
+  if (host) {
+    const start = () => import('../scripts/court').then((m) => m.mountCourt(host));
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver((entries, io) => {
+        if (entries.some((e) => e.isIntersecting)) { io.disconnect(); start(); }
+      }, { rootMargin: '600px 0px' }).observe(host);
+    } else start();
+  }
+</script>
