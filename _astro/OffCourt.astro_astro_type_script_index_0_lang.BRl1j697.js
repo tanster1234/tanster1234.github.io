@@ -1,0 +1,1 @@
+import{t as e}from"./preload-helper.B3nfOi5I.js";var t=document.querySelector(`[data-court]`);if(t){let n=()=>e(()=>import(`./court.nn74rZTy.js`).then(e=>e.mountCourt(t)),[]);`IntersectionObserver`in window?new IntersectionObserver((e,t)=>{e.some(e=>e.isIntersecting)&&(t.disconnect(),n())},{rootMargin:`600px 0px`}).observe(t):n()}
